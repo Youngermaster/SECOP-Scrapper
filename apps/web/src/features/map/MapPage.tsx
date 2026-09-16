@@ -25,11 +25,11 @@ const COLOMBIA_CENTER: [number, number] = [4.8, -73.6];
 
 /** Leaflet paints on Canvas/SVG attributes, which cannot resolve CSS variables. */
 const MAP_COLORS = {
-  fill: '#6366f1',
-  stroke: '#64748b',
-  selected: '#0f172a',
-  mine: '#f59e0b',
-  municipality: '#0ea5e9',
+  fill: '#2a78d6',
+  stroke: '#7c8190',
+  selected: '#24262e',
+  mine: '#d98a0b',
+  municipality: '#1c5cab',
 } as const;
 
 const METRIC_LABEL: Record<MapMetric, string> = {
@@ -119,7 +119,7 @@ export function MapPage() {
           </>
         }
       />
-      <div className="relative min-h-0 flex-1 p-4">
+      <div className="relative min-h-0 flex-1 p-3">
         {geojsonQ.isLoading ? <Skeleton className="h-full w-full" /> : null}
         {geojsonQ.data ? (
           <MapContainer
@@ -151,10 +151,10 @@ export function MapPage() {
                   center={[m.lat, m.lon]}
                   radius={4 + ratio * 22}
                   pathOptions={{
-                    color: mine ? MAP_COLORS.mine : MAP_COLORS.municipality,
-                    weight: 1.5,
+                    color: '#ffffff',
+                    weight: 1,
                     fillColor: mine ? MAP_COLORS.mine : MAP_COLORS.municipality,
-                    fillOpacity: 0.45,
+                    fillOpacity: 0.7,
                   }}
                 >
                   <LeafletTooltip direction="top" opacity={0.95}>
@@ -204,10 +204,12 @@ export function MapPage() {
             })}
           </MapContainer>
         ) : null}
-        <Card className="absolute right-6 bottom-6 z-[1000] w-56">
-          <CardContent className="space-y-2 p-3 text-xs">
-            <div className="font-semibold">{METRIC_LABEL[metric]} por departamento</div>
-            <div className="flex h-3 overflow-hidden rounded">
+        <Card className="absolute right-7 bottom-7 z-[1000] w-56 shadow-pop">
+          <CardContent className="space-y-2 p-3 pt-3 text-xs">
+            <div className="text-2xs font-medium text-muted-fg">
+              {METRIC_LABEL[metric]} por departamento
+            </div>
+            <div className="flex h-2 overflow-hidden rounded-sm">
               {legendSteps.map((s) => (
                 <div
                   key={s}
@@ -216,7 +218,7 @@ export function MapPage() {
                 />
               ))}
             </div>
-            <div className="flex justify-between text-muted-fg">
+            <div className="flex justify-between font-mono text-2xs text-muted-fg">
               <span>0</span>
               <span>{formatMetric(metric, data.maxDept)}</span>
             </div>

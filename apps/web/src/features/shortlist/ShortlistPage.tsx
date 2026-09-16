@@ -1,8 +1,6 @@
 import {
   Badge,
   Button,
-  Card,
-  CardContent,
   EmptyState,
   Select,
   SelectContent,
@@ -132,9 +130,9 @@ export function ShortlistPage() {
           </>
         }
       />
-      <div className="space-y-4 p-4 md:p-6">
+      <div className="space-y-4 p-4 md:p-5">
         {importError ? (
-          <p className="rounded-md border border-danger/40 bg-danger/10 px-3 py-2 text-sm text-danger">
+          <p className="rounded-md border border-danger/40 bg-danger-soft px-3 py-2 text-[13px] text-danger">
             {importError}
           </p>
         ) : null}
@@ -169,20 +167,25 @@ export function ShortlistPage() {
             }
             description="Usa el ícono de marcador en la lista o en el detalle para guardar procesos que te interesen."
             action={
-              <Link to="/" className="text-sm text-primary hover:underline">
+              <Link to="/" className="text-[13px] text-primary hover:underline">
                 Ir a oportunidades
               </Link>
             }
           />
         ) : (
-          <ul className="space-y-3">
+          <ul className="divide-y divide-border rounded-lg border border-border bg-card">
             {list.map((e) => {
               const live = scoredById.get(e.id);
               const o = live?.opportunity;
               return (
                 <li key={e.id}>
-                  <Card className={cn(e.status === 'discarded' && 'opacity-70')}>
-                    <CardContent className="grid gap-4 p-4 md:grid-cols-[auto_1fr_16rem]">
+                  <div
+                    className={cn(
+                      'transition-colors hover:bg-muted/40',
+                      e.status === 'discarded' && 'opacity-60',
+                    )}
+                  >
+                    <div className="grid gap-4 p-4 md:grid-cols-[auto_1fr_14rem]">
                       <div>
                         {live ? (
                           <ScoreChip score={live.score.score} />
@@ -193,7 +196,7 @@ export function ShortlistPage() {
                       <div className="min-w-0 space-y-1.5">
                         <Link
                           to={`/oportunidad/${encodeURIComponent(e.id)}`}
-                          className="line-clamp-2 font-medium hover:underline"
+                          className="line-clamp-2 text-[13px] leading-snug font-medium hover:underline"
                         >
                           {o?.title ?? e.snapshot.title}
                         </Link>
@@ -214,7 +217,7 @@ export function ShortlistPage() {
                             <Badge tone="warning">Fuera del dataset actual</Badge>
                           )}
                           {live ? <RupBadge rup={live.rup} compact /> : null}
-                          <span className="text-[11px] text-muted-fg">
+                          <span className="text-2xs text-muted-fg">
                             actualizada {relativeTime(e.updatedAt)}
                           </span>
                         </div>
@@ -250,9 +253,9 @@ export function ShortlistPage() {
                               href={o?.url ?? e.snapshot.url ?? '#'}
                               target="_blank"
                               rel="noreferrer noopener"
-                              className="inline-flex h-9 flex-1 items-center justify-center gap-2 rounded-md border border-border bg-card text-sm hover:bg-muted"
+                              className="inline-flex h-8 flex-1 items-center justify-center gap-1.5 rounded-md border border-input bg-card text-xs font-medium transition-colors hover:bg-muted"
                             >
-                              <ExternalLink className="size-4" /> SECOP II
+                              <ExternalLink className="size-3.5" /> SECOP II
                             </a>
                           ) : null}
                           <Button
@@ -265,8 +268,8 @@ export function ShortlistPage() {
                           </Button>
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </div>
                 </li>
               );
             })}

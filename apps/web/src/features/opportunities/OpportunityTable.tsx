@@ -29,9 +29,9 @@ const SORTABLE: Partial<Record<string, SortKey>> = {
 
 function daysTone(days: number | null, lifecycle: ScoredOpportunity['lifecycle']): string {
   if (lifecycle !== 'open' || days == null) return 'text-muted-fg';
-  if (days <= 1) return 'text-danger font-medium';
-  if (days <= 3) return 'text-warning font-medium';
-  return 'text-fg';
+  if (days <= 1) return 'font-medium text-danger';
+  if (days <= 3) return 'font-medium text-warning';
+  return 'text-fg-2';
 }
 
 export function OpportunityTable({ items }: { items: ScoredOpportunity[] }) {
@@ -46,7 +46,7 @@ export function OpportunityTable({ items }: { items: ScoredOpportunity[] }) {
         helper.display({
           id: 'score',
           header: 'Puntaje',
-          size: 72,
+          size: 64,
           cell: ({ row }) => <ScoreBadge result={row.original.score} />,
         }),
         helper.display({
@@ -59,12 +59,12 @@ export function OpportunityTable({ items }: { items: ScoredOpportunity[] }) {
               <div className="min-w-0">
                 <Link
                   to={`/oportunidad/${encodeURIComponent(o.id)}`}
-                  className="line-clamp-2 text-sm leading-snug font-medium text-fg hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                  className="line-clamp-2 text-[13px] leading-snug font-medium text-fg hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                   onClick={(e) => e.stopPropagation()}
                 >
                   {o.title}
                 </Link>
-                <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-fg">
+                <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-fg">
                   <span className="truncate">{o.entity.name}</span>
                   <FlagBadges flags={row.original.score.flags} max={2} />
                 </div>
@@ -80,7 +80,7 @@ export function OpportunityTable({ items }: { items: ScoredOpportunity[] }) {
             const e = row.original.opportunity.entity;
             return (
               <div className="text-xs leading-snug">
-                <div className="font-medium">{e.department ?? '—'}</div>
+                <div className="text-fg">{e.department ?? '—'}</div>
                 <div className="truncate text-muted-fg">{e.city ?? ''}</div>
               </div>
             );
@@ -94,7 +94,7 @@ export function OpportunityTable({ items }: { items: ScoredOpportunity[] }) {
             const o = row.original.opportunity;
             return (
               <div className="text-xs leading-snug">
-                <div className="line-clamp-2">{MODALITY_LABELS[o.modality]}</div>
+                <div className="line-clamp-2 text-fg-2">{MODALITY_LABELS[o.modality]}</div>
                 <div className="mt-1">
                   <RupBadge rup={row.original.rup} compact />
                 </div>
@@ -105,9 +105,9 @@ export function OpportunityTable({ items }: { items: ScoredOpportunity[] }) {
         helper.display({
           id: 'value',
           header: 'Valor',
-          size: 110,
+          size: 104,
           cell: ({ row }) => (
-            <span className="tabular text-sm">
+            <span className="font-mono text-xs tabular-nums">
               {formatCOPCompact(row.original.opportunity.value)}
             </span>
           ),
@@ -115,12 +115,12 @@ export function OpportunityTable({ items }: { items: ScoredOpportunity[] }) {
         helper.display({
           id: 'closesAt',
           header: 'Cierra',
-          size: 120,
+          size: 118,
           cell: ({ row }) => {
             const { opportunity: o, daysLeft, lifecycle } = row.original;
             return (
               <div className="text-xs leading-snug">
-                <div className="tabular">{formatDate(o.closesAt)}</div>
+                <div className="font-mono tabular-nums">{formatDate(o.closesAt)}</div>
                 <div className={daysTone(daysLeft, lifecycle)}>
                   {lifecycle === 'open'
                     ? daysLeftLabel(daysLeft)
@@ -135,7 +135,7 @@ export function OpportunityTable({ items }: { items: ScoredOpportunity[] }) {
         helper.display({
           id: 'actions',
           header: '',
-          size: 84,
+          size: 76,
           cell: ({ row }) => {
             const o = row.original.opportunity;
             return (
@@ -150,7 +150,7 @@ export function OpportunityTable({ items }: { items: ScoredOpportunity[] }) {
                         rel="noreferrer noopener"
                         aria-label="Abrir en SECOP II"
                         onClick={(e) => e.stopPropagation()}
-                        className="grid size-8 place-items-center rounded-md text-muted-fg hover:bg-muted hover:text-fg focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                        className="grid size-7 place-items-center rounded-md text-muted-fg transition-colors hover:bg-muted hover:text-fg focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                       >
                         <ExternalLink className="size-4" />
                       </a>
@@ -178,7 +178,7 @@ export function OpportunityTable({ items }: { items: ScoredOpportunity[] }) {
   const virtualizer = useVirtualizer({
     count: rows.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => 76,
+    estimateSize: () => 72,
     overscan: 8,
   });
 
@@ -220,9 +220,9 @@ export function OpportunityTable({ items }: { items: ScoredOpportunity[] }) {
     <div ref={parentRef} className="h-full scrollbar-thin overflow-auto">
       <table
         className="w-full border-separate border-spacing-0 text-left"
-        style={{ minWidth: 980 }}
+        style={{ minWidth: 960 }}
       >
-        <thead className="sticky top-0 z-10 bg-bg/95 backdrop-blur">
+        <thead className="sticky top-0 z-10 bg-bg">
           {table.getHeaderGroups().map((hg) => (
             <tr key={hg.id}>
               {hg.headers.map((h) => {
@@ -233,14 +233,14 @@ export function OpportunityTable({ items }: { items: ScoredOpportunity[] }) {
                     key={h.id}
                     scope="col"
                     style={{ width: h.getSize() }}
-                    className="border-b border-border px-3 py-2 text-xs font-semibold tracking-wide text-muted-fg uppercase"
+                    className="h-9 border-b border-border px-3 text-2xs font-medium text-muted-fg"
                   >
                     {key ? (
                       <button
                         type="button"
                         onClick={() => toggleSort(h.id)}
                         className={cn(
-                          'inline-flex items-center gap-1 rounded hover:text-fg focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
+                          'inline-flex cursor-pointer items-center gap-1 rounded-sm transition-colors hover:text-fg focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
                           active && 'text-fg',
                         )}
                         aria-sort={
@@ -255,7 +255,7 @@ export function OpportunityTable({ items }: { items: ScoredOpportunity[] }) {
                             <ArrowDown className="size-3" />
                           )
                         ) : (
-                          <ArrowUpDown className="size-3 opacity-50" />
+                          <ArrowUpDown className="size-3 opacity-40" />
                         )}
                       </button>
                     ) : (
@@ -283,10 +283,13 @@ export function OpportunityTable({ items }: { items: ScoredOpportunity[] }) {
                 data-index={vr.index}
                 ref={virtualizer.measureElement}
                 onClick={() => void navigate(`/oportunidad/${encodeURIComponent(o.id)}`)}
-                className="group cursor-pointer transition-colors hover:bg-muted/60"
+                className="group cursor-pointer transition-colors hover:bg-card"
               >
                 {row.getVisibleCells().map((cell) => (
-                  <td key={cell.id} className="border-b border-border/70 px-3 py-2.5 align-top">
+                  <td
+                    key={cell.id}
+                    className="border-b border-border px-3 py-2.5 align-top group-hover:border-border-strong/60"
+                  >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </td>
                 ))}

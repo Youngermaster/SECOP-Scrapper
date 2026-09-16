@@ -15,14 +15,24 @@ export function CodeBlock({ code, className }: { code: string; className?: strin
     }
   };
   return (
-    <div className={cn('group relative rounded-lg border border-border bg-muted/60', className)}>
-      <pre className="overflow-x-auto px-4 py-3 font-mono text-[13px] leading-relaxed text-fg">
-        <code>{code}</code>
+    <div
+      className={cn(
+        'group relative rounded-md border border-border bg-muted/50 dark:bg-bg',
+        className,
+      )}
+    >
+      <pre className="overflow-x-auto py-2.5 pr-10 pl-3.5 font-mono text-xs leading-relaxed text-fg">
+        <code>
+          <span aria-hidden="true" className="text-muted-fg select-none">
+            ${' '}
+          </span>
+          {code}
+        </code>
       </pre>
       <Button
         size="icon-sm"
         variant="ghost"
-        className="absolute top-1.5 right-1.5 opacity-60 group-hover:opacity-100"
+        className="absolute top-1 right-1 opacity-70 group-hover:opacity-100"
         onClick={() => void copy()}
         aria-label={copied ? t.common.copied : t.common.copy}
       >

@@ -10,7 +10,7 @@ import {
   type Modality,
   type RupFilter,
 } from '@secop-radar/core';
-import { Button, Checkbox, Input, Label, Slider, Switch } from '@secop-radar/ui';
+import { Button, Checkbox, cn, Input, Label, Slider, Switch } from '@secop-radar/ui';
 import { RotateCcw } from 'lucide-react';
 import { Link } from 'react-router';
 import { MultiSelect } from '@/components/MultiSelect';
@@ -28,7 +28,7 @@ const RUP_OPTIONS: Array<{ value: RupFilter; label: string }> = [
 
 const VALUE_PRESETS: Array<{ label: string; min: number | null; max: number | null }> = [
   { label: '< 50 M', min: null, max: 50_000_000 },
-  { label: '50–300 M', min: 50_000_000, max: 300_000_000 },
+  { label: '50-300 M', min: 50_000_000, max: 300_000_000 },
   { label: '> 300 M', min: 300_000_000, max: null },
 ];
 
@@ -51,13 +51,62 @@ function Section({
   hint?: React.ReactNode;
 }) {
   return (
-    <section className="space-y-2">
+    <section className="space-y-2 border-t border-border pt-4 first:border-t-0 first:pt-0">
       <div className="flex items-baseline justify-between">
-        <h3 className="text-xs font-semibold tracking-wide text-muted-fg uppercase">{title}</h3>
+        <h3 className="text-xs font-semibold text-fg">{title}</h3>
         {hint}
       </div>
       {children}
     </section>
+  );
+}
+
+function CheckRow({
+  checked,
+  onToggle,
+  label,
+  count,
+}: {
+  checked: boolean;
+  onToggle: () => void;
+  label: string;
+  count: number;
+}) {
+  return (
+    <label
+      className={cn(
+        'flex h-7 cursor-pointer items-center gap-2 rounded-sm px-1 text-[13px] hover:bg-muted/70',
+        count === 0 && !checked && 'text-muted-fg',
+      )}
+    >
+      <Checkbox checked={checked} onCheckedChange={onToggle} />
+      <span className="flex-1 truncate">{label}</span>
+      <span className="font-mono text-2xs text-muted-fg tabular-nums">
+        {count.toLocaleString('es-CO')}
+      </span>
+    </label>
+  );
+}
+
+function Toggle({
+  label,
+  hint,
+  checked,
+  onChange,
+}: {
+  label: string;
+  hint?: string;
+  checked: boolean;
+  onChange: (v: boolean) => void;
+}) {
+  return (
+    <label className="flex cursor-pointer items-center justify-between gap-3 py-0.5 text-[13px]">
+      <span>
+        {label}
+        {hint ? <span className="block text-2xs text-muted-fg">{hint}</span> : null}
+      </span>
+      <Switch checked={checked} onCheckedChange={onChange} aria-label={label} />
+    </label>
   );
 }
 
@@ -94,11 +143,11 @@ export function FilterPanel({ facets }: { facets: FilteredResult['facets'] }) {
     .sort((a, b) => b.count - a.count);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <Section
         title="Región"
         hint={
-          <Link to="/ajustes" className="text-[11px] text-primary hover:underline">
+          <Link to="/ajustes" className="text-2xs text-primary hover:underline">
             Mi región: {regionName}
           </Link>
         }
@@ -131,21 +180,17 @@ export function FilterPanel({ facets }: { facets: FilteredResult['facets'] }) {
       </Section>
 
       <Section title="Estado">
-        <ul className="space-y-1">
-          {LIFECYCLES.map((l: Lifecycle) => {
-            const checked = filters.lifecycles.includes(l);
-            return (
-              <li key={l}>
-                <label className="flex cursor-pointer items-center gap-2 text-sm">
-                  <Checkbox checked={checked} onCheckedChange={() => toggleIn('lifecycles', l)} />
-                  <span className="flex-1">{LIFECYCLE_LABELS[l]}</span>
-                  <span className="tabular text-xs text-muted-fg">
-                    {(facets.lifecycles.get(l) ?? 0).toLocaleString('es-CO')}
-                  </span>
-                </label>
-              </li>
-            );
-          })}
+        <ul>
+          {LIFECYCLES.map((l: Lifecycle) => (
+            <li key={l}>
+              <CheckRow
+                checked={filters.lifecycles.includes(l)}
+                onToggle={() => toggleIn('lifecycles', l)}
+                label={LIFECYCLE_LABELS[l]}
+                count={facets.lifecycles.get(l) ?? 0}
+              />
+            </li>
+          ))}
         </ul>
       </Section>
 
@@ -157,16 +202,16 @@ export function FilterPanel({ facets }: { facets: FilteredResult['facets'] }) {
             aria-label="Valor mínimo en millones"
             value={millions(filters.valueMin)}
             onChange={(e) => set({ valueMin: fromMillions(e.target.value) })}
-            className="h-8"
+            className="h-7 font-mono"
           />
-          <span className="text-muted-fg">–</span>
+          <span className="text-muted-fg">-</span>
           <Input
             inputMode="decimal"
             placeholder="máx"
             aria-label="Valor máximo en millones"
             value={millions(filters.valueMax)}
             onChange={(e) => set({ valueMax: fromMillions(e.target.value) })}
-            className="h-8"
+            className="h-7 font-mono"
           />
         </div>
         <div className="flex flex-wrap gap-1">
@@ -177,7 +222,7 @@ export function FilterPanel({ facets }: { facets: FilteredResult['facets'] }) {
                 key={p.label}
                 size="sm"
                 variant={active ? 'secondary' : 'outline'}
-                className="h-7 px-2 text-xs"
+                className="h-6 px-2 font-mono text-2xs"
                 onClick={() =>
                   set(
                     active
@@ -191,41 +236,31 @@ export function FilterPanel({ facets }: { facets: FilteredResult['facets'] }) {
             );
           })}
         </div>
-        <label className="flex items-center justify-between gap-2 text-sm">
-          <span>Incluir sin valor informado</span>
-          <Switch
-            checked={filters.includeUnknownValue}
-            onCheckedChange={(v) => set({ includeUnknownValue: v })}
-            aria-label="Incluir sin valor informado"
-          />
-        </label>
+        <Toggle
+          label="Incluir sin valor informado"
+          checked={filters.includeUnknownValue}
+          onChange={(v) => set({ includeUnknownValue: v })}
+        />
       </Section>
 
       <Section title="Modalidad">
-        <ul className="space-y-1">
+        <ul>
           {MODALITIES.map((m: Modality) => (
             <li key={m}>
-              <label className="flex cursor-pointer items-center gap-2 text-sm">
-                <Checkbox
-                  checked={filters.modalities.includes(m)}
-                  onCheckedChange={() => toggleIn('modalities', m)}
-                />
-                <span className="flex-1 truncate">{MODALITY_LABELS[m]}</span>
-                <span className="tabular text-xs text-muted-fg">
-                  {(facets.modalities.get(m) ?? 0).toLocaleString('es-CO')}
-                </span>
-              </label>
+              <CheckRow
+                checked={filters.modalities.includes(m)}
+                onToggle={() => toggleIn('modalities', m)}
+                label={MODALITY_LABELS[m]}
+                count={facets.modalities.get(m) ?? 0}
+              />
             </li>
           ))}
         </ul>
-        <label className="flex items-center justify-between gap-2 text-sm">
-          <span>Solo procesos competitivos</span>
-          <Switch
-            checked={filters.onlyCompetitive}
-            onCheckedChange={(v) => set({ onlyCompetitive: v })}
-            aria-label="Solo procesos competitivos"
-          />
-        </label>
+        <Toggle
+          label="Solo procesos competitivos"
+          checked={filters.onlyCompetitive}
+          onChange={(v) => set({ onlyCompetitive: v })}
+        />
       </Section>
 
       <Section title="RUP (inferido)">
@@ -252,7 +287,7 @@ export function FilterPanel({ facets }: { facets: FilteredResult['facets'] }) {
             <Input
               id="f-pub-from"
               type="date"
-              className="h-8"
+              className="h-7 font-mono text-xs"
               value={filters.publishedFrom ?? ''}
               onChange={(e) => set({ publishedFrom: e.target.value || null })}
             />
@@ -262,7 +297,7 @@ export function FilterPanel({ facets }: { facets: FilteredResult['facets'] }) {
             <Input
               id="f-pub-to"
               type="date"
-              className="h-8"
+              className="h-7 font-mono text-xs"
               value={filters.publishedTo ?? ''}
               onChange={(e) => set({ publishedTo: e.target.value || null })}
             />
@@ -272,7 +307,7 @@ export function FilterPanel({ facets }: { facets: FilteredResult['facets'] }) {
             <Input
               id="f-close-from"
               type="date"
-              className="h-8"
+              className="h-7 font-mono text-xs"
               value={filters.closesFrom ?? ''}
               onChange={(e) => set({ closesFrom: e.target.value || null })}
             />
@@ -282,7 +317,7 @@ export function FilterPanel({ facets }: { facets: FilteredResult['facets'] }) {
             <Input
               id="f-close-to"
               type="date"
-              className="h-8"
+              className="h-7 font-mono text-xs"
               value={filters.closesTo ?? ''}
               onChange={(e) => set({ closesTo: e.target.value || null })}
             />
@@ -290,7 +325,10 @@ export function FilterPanel({ facets }: { facets: FilteredResult['facets'] }) {
         </div>
       </Section>
 
-      <Section title={`Puntaje mínimo · ${filters.minScore}`}>
+      <Section
+        title="Puntaje mínimo"
+        hint={<span className="font-mono text-2xs text-muted-fg">{filters.minScore}</span>}
+      >
         <Slider
           min={0}
           max={100}
@@ -318,19 +356,18 @@ export function FilterPanel({ facets }: { facets: FilteredResult['facets'] }) {
           onClear={() => set({ contractTypes: [] })}
           placeholder="Todos los tipos"
         />
-        <label className="flex items-center justify-between gap-2 text-sm">
-          <span>Solo con enlace a SECOP</span>
-          <Switch
-            checked={filters.onlyWithUrl}
-            onCheckedChange={(v) => set({ onlyWithUrl: v })}
-            aria-label="Solo con enlace a SECOP"
-          />
-        </label>
+        <Toggle
+          label="Solo con enlace a SECOP"
+          checked={filters.onlyWithUrl}
+          onChange={(v) => set({ onlyWithUrl: v })}
+        />
       </Section>
 
-      <Button variant="outline" className="w-full" onClick={reset}>
-        <RotateCcw /> Restablecer filtros
-      </Button>
+      <div className="border-t border-border pt-4">
+        <Button variant="outline" className="w-full" onClick={reset}>
+          <RotateCcw /> Restablecer filtros
+        </Button>
+      </div>
     </div>
   );
 }

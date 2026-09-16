@@ -19,20 +19,20 @@ const LIGHT: ChartColors = {
   series1: '#2a78d6',
   series2: '#eb6834',
   sequential: ['#b7d3f6', '#86b6ef', '#5598e7', '#2a78d6', '#1c5cab', '#104281'],
-  text: '#1a1a24',
-  textMuted: '#6b6f80',
-  grid: '#e6e7ec',
-  surface: '#ffffff',
+  text: '#24262e',
+  textMuted: '#6e727f',
+  grid: '#e3e4e9',
+  surface: '#fdfdfe',
 };
 
 const DARK: ChartColors = {
   series1: '#3987e5',
   series2: '#d95926',
   sequential: ['#184f95', '#1c5cab', '#256abf', '#3987e5', '#6da7ec', '#9ec5f4'],
-  text: '#ececf2',
-  textMuted: '#a5a8b8',
-  grid: '#33343f',
-  surface: '#19191f',
+  text: '#eceef2',
+  textMuted: '#9da1ad',
+  grid: '#30333c',
+  surface: '#1b1d23',
 };
 
 function isDarkNow(theme: 'system' | 'light' | 'dark'): boolean {

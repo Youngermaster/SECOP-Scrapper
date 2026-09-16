@@ -204,6 +204,12 @@ export interface DatasetManifest {
     processesDataset: string;
     contractsDataset: string;
   };
+  /** Artifact file names relative to the manifest. `.gz` files are gzip-compressed JSON. */
+  files: {
+    opportunities: string;
+    contracts: string;
+    geo: string;
+  };
 }
 
 /* ------------------------------------------------------------------------- */

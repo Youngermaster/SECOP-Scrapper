@@ -15,7 +15,7 @@ import {
 import { SlidersHorizontal } from 'lucide-react';
 import { useMemo } from 'react';
 import { Link } from 'react-router';
-import { ChartCard, StatTile } from '@/components/charts/ChartPrimitives';
+import { ChartCard, StatStrip, StatTile } from '@/components/charts/ChartPrimitives';
 import { RankedBarChart } from '@/components/charts/RankedBarChart';
 import { TimeSeriesChart } from '@/components/charts/TimeSeriesChart';
 import { PageHeader } from '@/components/PageHeader';
@@ -135,8 +135,8 @@ export function AnalyticsPage() {
           </Link>
         }
       />
-      <div className="space-y-4 p-4 md:p-6">
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
+      <div className="space-y-4 p-4 md:p-5">
+        <StatStrip>
           <StatTile label="Oportunidades" value={items.length.toLocaleString('es-CO')} />
           <StatTile label="Abiertas" value={stats.open.toLocaleString('es-CO')} />
           <StatTile
@@ -155,7 +155,7 @@ export function AnalyticsPage() {
             value={formatCOPCompact(stats.value.median)}
             hint={`${stats.value.withValue.toLocaleString('es-CO')} con valor`}
           />
-        </div>
+        </StatStrip>
 
         <ChartCard
           title="Publicaciones y cierres por semana"

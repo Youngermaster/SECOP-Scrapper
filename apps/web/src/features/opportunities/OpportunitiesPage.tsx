@@ -1,9 +1,9 @@
 import {
   countActiveFilters,
   DEFAULT_FILTERS,
-  MODALITY_LABELS,
   DEPARTMENTS,
   LIFECYCLE_LABELS,
+  MODALITY_LABELS,
   type SortKey,
 } from '@secop-radar/core';
 import {
@@ -16,9 +16,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@secop-radar/ui';
-import { ArrowDownWideNarrow, ArrowUpNarrowWide, Search, SlidersHorizontal, X } from 'lucide-react';
+import {
+  ArrowDownWideNarrow,
+  ArrowUpNarrowWide,
+  Download,
+  Search,
+  SlidersHorizontal,
+  X,
+} from 'lucide-react';
 import { useState } from 'react';
 import { t } from '@/i18n/es';
+import { downloadText, opportunitiesToCsv } from '@/lib/csv';
 import { useFilters } from '@/stores/filters';
 import { FilterPanel } from './FilterPanel';
 import { OpportunityTable } from './OpportunityTable';
@@ -124,21 +132,22 @@ export function OpportunitiesPage() {
 
   return (
     <div className="flex h-dvh flex-col">
-      <div className="flex flex-col gap-3 border-b border-border px-4 py-3 md:px-6">
+      <div className="flex flex-col gap-2 border-b border-border px-4 py-2.5 md:px-5">
         <div className="flex flex-wrap items-center gap-2">
           <div className="relative min-w-60 flex-1">
-            <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-fg" />
+            <Search className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-fg" />
             <Input
               type="search"
               value={filters.query}
               onChange={(e) => set({ query: e.target.value })}
-              placeholder="Buscar: software, aplicación, robótica, prestación de servicios…"
+              placeholder="Buscar: software, aplicación, robótica, prestación de servicios"
               aria-label="Buscar oportunidades"
-              className="h-10 pl-9 text-base md:text-sm"
+              className="h-9 pl-8 text-sm md:text-[13px]"
             />
           </div>
           <Select value={filters.sortKey} onValueChange={(v) => set({ sortKey: v as SortKey })}>
-            <SelectTrigger className="h-10 w-48" aria-label="Ordenar por">
+            <SelectTrigger className="h-9 w-44" aria-label="Ordenar por">
+              <span className="text-muted-fg">Orden:&nbsp;</span>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -152,7 +161,7 @@ export function OpportunitiesPage() {
           <Button
             variant="outline"
             size="icon"
-            className="size-10"
+            className="size-9"
             aria-label={filters.sortDir === 'desc' ? 'Orden descendente' : 'Orden ascendente'}
             onClick={() => set({ sortDir: filters.sortDir === 'desc' ? 'asc' : 'desc' })}
           >
@@ -160,26 +169,46 @@ export function OpportunitiesPage() {
           </Button>
           <Button
             variant="outline"
-            className="h-10 md:hidden"
+            size="icon"
+            className="size-9"
+            aria-label="Exportar resultados a CSV"
+            title="Exportar resultados a CSV"
+            disabled={items.length === 0}
+            onClick={() =>
+              downloadText(
+                `secop-radar-oportunidades-${new Date().toISOString().slice(0, 10)}.csv`,
+                opportunitiesToCsv(items),
+              )
+            }
+          >
+            <Download />
+          </Button>
+          <Button
+            variant="outline"
+            className="h-9 md:hidden"
             onClick={() => setPanelOpen((v) => !v)}
             aria-expanded={panelOpen}
           >
             <SlidersHorizontal /> Filtros{' '}
-            {active > 0 ? <Badge tone="primary">{active}</Badge> : null}
+            {active > 0 ? (
+              <Badge tone="primary" className="font-mono">
+                {active}
+              </Badge>
+            ) : null}
           </Button>
         </div>
         <PresetBar />
-        <div className="flex flex-wrap items-center gap-1.5 text-sm text-muted-fg">
-          <span className="tabular mr-1">
-            <strong className="text-fg">{t.common.results(items.length)}</strong> {t.common.of}{' '}
-            {total.toLocaleString('es-CO')}
+        <div className="flex flex-wrap items-center gap-1.5 text-xs text-muted-fg">
+          <span className="mr-1 font-mono tabular-nums">
+            <strong className="font-semibold text-fg">{t.common.results(items.length)}</strong>{' '}
+            {t.common.of} {total.toLocaleString('es-CO')}
           </span>
           {chips.map((c) => (
             <button
               key={c.key}
               type="button"
               onClick={c.onRemove}
-              className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-2 py-0.5 text-xs text-fg hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+              className="inline-flex h-5 cursor-pointer items-center gap-1 rounded-sm border border-border bg-card px-1.5 text-2xs text-fg-2 transition-colors hover:border-border-strong hover:text-fg focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
               aria-label={`Quitar filtro ${c.label}`}
             >
               {c.label}
@@ -195,7 +224,7 @@ export function OpportunitiesPage() {
       </div>
       <div className="flex min-h-0 flex-1">
         <aside
-          className={`${panelOpen ? 'block' : 'hidden'} w-full shrink-0 scrollbar-thin overflow-y-auto border-r border-border p-4 md:block md:w-72`}
+          className={`${panelOpen ? 'block' : 'hidden'} w-full shrink-0 scrollbar-thin overflow-y-auto border-r border-border bg-sidebar/60 px-4 py-4 md:block md:w-[272px]`}
           aria-label="Filtros"
         >
           <FilterPanel facets={facets} />

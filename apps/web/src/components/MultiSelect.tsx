@@ -56,30 +56,34 @@ export function MultiSelect({
           type="button"
           aria-label={`${label}: ${summary}`}
           className={cn(
-            'flex h-9 w-full items-center justify-between gap-2 rounded-md border border-input bg-card px-3 text-sm shadow-xs focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
+            'flex h-8 w-full cursor-pointer items-center justify-between gap-2 rounded-md border border-input bg-card px-2.5 text-[13px] transition-colors hover:border-border-strong focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/35 focus-visible:outline-none',
             selected.length === 0 ? 'text-muted-fg' : 'text-fg',
           )}
         >
           <span className="truncate">{summary}</span>
           <span className="flex items-center gap-1">
-            {selected.length > 0 ? <Badge tone="primary">{selected.length}</Badge> : null}
-            <ChevronsUpDown className="size-4 opacity-60" />
+            {selected.length > 0 ? (
+              <Badge tone="primary" className="font-mono">
+                {selected.length}
+              </Badge>
+            ) : null}
+            <ChevronsUpDown className="size-3.5 text-muted-fg" />
           </span>
         </button>
       </PopoverTrigger>
-      <PopoverContent className="w-80 p-2">
+      <PopoverContent className="w-80 p-1.5">
         {searchable ? (
           <Input
             autoFocus
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder={`Buscar ${label.toLowerCase()}…`}
-            className="mb-2 h-8"
+            placeholder={`Buscar ${label.toLowerCase()}`}
+            className="mb-1.5 h-7"
             aria-label={`Buscar ${label}`}
           />
         ) : null}
         <ul
-          className="max-h-64 scrollbar-thin space-y-0.5 overflow-y-auto"
+          className="max-h-64 scrollbar-thin space-y-px overflow-y-auto"
           role="listbox"
           aria-multiselectable="true"
           aria-label={label}
@@ -94,12 +98,12 @@ export function MultiSelect({
               <li key={o.value} role="option" aria-selected={checked}>
                 <label
                   htmlFor={id}
-                  className="flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-sm hover:bg-muted"
+                  className="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-[13px] hover:bg-muted"
                 >
                   <Checkbox id={id} checked={checked} onCheckedChange={() => onToggle(o.value)} />
                   <span className="flex-1 truncate">{o.label}</span>
                   {o.count != null ? (
-                    <span className="tabular text-xs text-muted-fg">
+                    <span className="font-mono text-2xs text-muted-fg tabular-nums">
                       {o.count.toLocaleString('es-CO')}
                     </span>
                   ) : null}
@@ -109,7 +113,7 @@ export function MultiSelect({
           })}
         </ul>
         {selected.length > 0 ? (
-          <div className="mt-2 border-t border-border pt-2">
+          <div className="mt-1.5 border-t border-border pt-1.5">
             <Button variant="ghost" size="sm" onClick={onClear} className="w-full justify-start">
               <X /> Limpiar selección
             </Button>

@@ -12,7 +12,11 @@ export function ThemeToggle() {
   const theme = useSettings((s) => s.theme);
   const setTheme = useSettings((s) => s.setTheme);
   return (
-    <div role="radiogroup" aria-label="Tema" className="inline-flex rounded-md bg-white/5 p-0.5">
+    <div
+      role="radiogroup"
+      aria-label="Tema"
+      className="inline-flex rounded-md border border-border bg-card p-0.5"
+    >
       {OPTIONS.map((o) => (
         <button
           key={o.value}
@@ -23,11 +27,11 @@ export function ThemeToggle() {
           title={o.label}
           onClick={() => setTheme(o.value)}
           className={cn(
-            'grid size-7 place-items-center rounded text-sidebar-muted transition-colors hover:text-sidebar-fg focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
-            theme === o.value && 'bg-sidebar-active text-sidebar-fg',
+            'grid h-6 w-7 cursor-pointer place-items-center rounded-sm text-muted-fg transition-colors hover:text-fg focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
+            theme === o.value && 'bg-muted text-fg',
           )}
         >
-          <o.icon className="size-3.5" />
+          <o.icon className="size-3.5" strokeWidth={1.75} />
         </button>
       ))}
     </div>

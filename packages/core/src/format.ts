@@ -14,6 +14,8 @@ export function formatCOP(value: number | null | undefined): string {
 export function formatCOPCompact(value: number | null | undefined): string {
   if (value == null) return '—';
   const abs = Math.abs(value);
+  if (abs >= 1_000_000_000_000)
+    return `$ ${(value / 1_000_000_000_000).toFixed(1).replace('.', ',')} billones`;
   if (abs >= 1_000_000_000)
     return `$ ${(value / 1_000_000_000).toFixed(1).replace('.', ',')} mil M`;
   if (abs >= 1_000_000)

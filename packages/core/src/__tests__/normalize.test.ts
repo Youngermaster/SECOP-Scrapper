@@ -22,6 +22,18 @@ import {
   stripAccents,
 } from '../normalize';
 
+describe('format', () => {
+  it('formats compact COP across magnitudes', async () => {
+    const { formatCOPCompact, formatCOP, formatDate } = await import('../format');
+    expect(formatCOPCompact(null)).toBe('—');
+    expect(formatCOPCompact(48_000_000)).toBe('$ 48,0 M');
+    expect(formatCOPCompact(1_592_769_513)).toBe('$ 1,6 mil M');
+    expect(formatCOPCompact(13_284_600_000_000)).toBe('$ 13,3 billones');
+    expect(formatCOP(24_082_620)).toMatch(/24\.082\.620/);
+    expect(formatDate('2026-09-14')).toBe('14 sep 2026');
+  });
+});
+
 describe('text', () => {
   it('strips accents and normalizes', () => {
     expect(stripAccents('Itagüí Bogotá ñandú')).toBe('Itagui Bogota nandu');

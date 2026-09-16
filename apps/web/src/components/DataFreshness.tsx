@@ -1,5 +1,4 @@
 import { differenceInCalendarDays, parseISO } from 'date-fns';
-import { Database } from 'lucide-react';
 import { useManifest } from '@/data/queries';
 import { t } from '@/i18n/es';
 import { relativeTime } from '@/lib/format';
@@ -10,18 +9,23 @@ export function DataFreshness() {
   const days = differenceInCalendarDays(new Date(), parseISO(data.generatedAt));
   const stale = days >= 2;
   return (
-    <div className="flex items-start gap-2 text-[11px] leading-snug text-sidebar-muted">
-      <Database
-        className={stale ? 'mt-0.5 size-3.5 text-warning' : 'mt-0.5 size-3.5 text-success'}
-      />
-      <div>
-        <div>{t.freshness.updated(relativeTime(data.generatedAt))}</div>
-        <div>
-          {data.counts.opportunities.toLocaleString('es-CO')} procesos ·{' '}
-          {data.counts.contracts.toLocaleString('es-CO')} contratos
-        </div>
-        {stale ? <div className="mt-1 text-warning">{t.freshness.stale(days)}</div> : null}
+    <div className="space-y-1 text-2xs leading-snug text-sidebar-muted">
+      <div className="flex items-center gap-1.5">
+        <span
+          aria-hidden="true"
+          className={
+            stale ? 'size-1.5 rounded-full bg-warning' : 'size-1.5 rounded-full bg-success'
+          }
+        />
+        <span className="text-sidebar-fg">
+          {t.freshness.updated(relativeTime(data.generatedAt))}
+        </span>
       </div>
+      <div className="font-mono">
+        {data.counts.opportunities.toLocaleString('es-CO')} procesos ·{' '}
+        {data.counts.contracts.toLocaleString('es-CO')} contratos
+      </div>
+      {stale ? <div className="text-warning">{t.freshness.stale(days)}</div> : null}
     </div>
   );
 }

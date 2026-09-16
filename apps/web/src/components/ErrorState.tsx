@@ -11,10 +11,13 @@ export function ErrorState({ error, onRetry }: { error: unknown; onRetry?: () =>
         title={t.common.error}
         description={
           <div className="space-y-2">
-            <p className="break-words">{message}</p>
+            <p className="font-mono text-xs break-words text-fg-2">{message}</p>
             <p>
               Si el archivo de datos está dañado o desactualizado, vuelve a ejecutar{' '}
-              <code className="rounded bg-muted px-1 py-0.5 font-mono text-xs">pnpm scraper</code>.
+              <code className="rounded-sm bg-muted px-1 py-0.5 font-mono text-xs">
+                pnpm scraper
+              </code>
+              .
             </p>
           </div>
         }

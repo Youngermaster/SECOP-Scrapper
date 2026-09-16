@@ -1,8 +1,8 @@
 import {
   MODALITY_LABELS,
+  RUP_LABELS,
   UNSPSC_FAMILY_LABELS,
   UNSPSC_SEGMENT_LABELS,
-  RUP_LABELS,
 } from '@secop-radar/core';
 import {
   Badge,
@@ -13,6 +13,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  cn,
   EmptyState,
   Select,
   SelectContent,
@@ -21,7 +22,7 @@ import {
   SelectValue,
   Textarea,
 } from '@secop-radar/ui';
-import { ArrowLeft, Copy, ExternalLink, FileSearch, Link2Off } from 'lucide-react';
+import { ArrowLeft, ExternalLink, FileSearch, Link2Off } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useParams } from 'react-router';
 import { FlagBadges, LifecycleBadge, RupBadge } from '@/components/Badges';
@@ -37,16 +38,38 @@ function Field({
   label,
   children,
   mono = false,
+  className,
 }: {
   label: string;
   children: React.ReactNode;
   mono?: boolean;
+  className?: string;
 }) {
   return (
-    <div className="min-w-0">
-      <dt className="text-[11px] tracking-wide text-muted-fg uppercase">{label}</dt>
-      <dd className={mono ? 'font-mono text-sm break-all' : 'text-sm'}>{children ?? '—'}</dd>
+    <div className={cn('min-w-0', className)}>
+      <dt className="text-2xs text-muted-fg">{label}</dt>
+      <dd className={cn('mt-0.5 text-[13px] text-fg', mono && 'font-mono text-xs break-all')}>
+        {children ?? '—'}
+      </dd>
     </div>
+  );
+}
+
+function Section({
+  title,
+  description,
+  children,
+}: {
+  title: string;
+  description?: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="border-t border-border py-5 first:border-t-0 first:pt-0">
+      <h2 className="text-[13px] font-semibold tracking-tight">{title}</h2>
+      {description ? <p className="mt-0.5 text-xs text-muted-fg">{description}</p> : null}
+      <div className="mt-3">{children}</div>
+    </section>
   );
 }
 
@@ -97,23 +120,34 @@ export function OpportunityDetailPage() {
   };
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-5 md:px-6">
-      <Link to="/" className="inline-flex items-center gap-1 text-sm text-muted-fg hover:text-fg">
-        <ArrowLeft className="size-4" /> Oportunidades
+    <div className="mx-auto max-w-[1400px] px-5 py-4 md:px-8">
+      <Link
+        to="/"
+        className="inline-flex items-center gap-1 text-xs text-muted-fg transition-colors hover:text-fg"
+      >
+        <ArrowLeft className="size-3.5" /> Oportunidades
       </Link>
 
-      <header className="mt-3 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+      <header className="mt-3 flex flex-col gap-4 border-b border-border pb-5 md:flex-row md:items-start md:justify-between">
         <div className="flex min-w-0 gap-4">
-          <ScoreChip score={item.score.score} className="size-14 text-xl" />
+          <ScoreChip score={item.score.score} className="size-12 text-lg" />
           <div className="min-w-0">
-            <h1 className="text-lg leading-snug font-semibold text-balance md:text-xl">
+            <p className="font-mono text-2xs text-muted-fg">
+              {o.id}
+              {o.reference ? ` · ${o.reference}` : ''}
+            </p>
+            <h1 className="mt-1 max-w-3xl text-base leading-snug font-semibold text-balance md:text-lg">
               {o.title}
             </h1>
-            <p className="mt-1 text-sm text-muted-fg">
-              {o.entity.name} · {o.entity.city ? `${o.entity.city}, ` : ''}
-              {o.entity.department ?? 'Departamento no definido'}
+            <p className="mt-1 text-[13px] text-fg-2">
+              {o.entity.name}
+              <span className="text-muted-fg">
+                {' '}
+                · {o.entity.city ? `${o.entity.city}, ` : ''}
+                {o.entity.department ?? 'Departamento no definido'}
+              </span>
             </p>
-            <div className="mt-2 flex flex-wrap items-center gap-1.5">
+            <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
               <LifecycleBadge lifecycle={item.lifecycle} />
               <Badge tone="outline">{MODALITY_LABELS[o.modality]}</Badge>
               <RupBadge rup={item.rup} />
@@ -147,202 +181,194 @@ export function OpportunityDetailPage() {
       </header>
 
       {entry ? (
-        <Card className="mt-5 border-primary/30">
-          <CardContent className="flex flex-col gap-3 p-4 md:flex-row md:items-start">
-            <div className="w-full md:w-56">
-              <label
-                className="mb-1 block text-xs font-medium text-muted-fg"
-                htmlFor="shortlist-status"
-              >
-                Estado de mi postulación
-              </label>
-              <Select
-                value={entry.status}
-                onValueChange={(v) => setStatus(o.id, v as ShortlistStatus)}
-              >
-                <SelectTrigger id="shortlist-status">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {(Object.keys(SHORTLIST_STATUS_LABELS) as ShortlistStatus[]).map((s) => (
-                    <SelectItem key={s} value={s}>
-                      {SHORTLIST_STATUS_LABELS[s]}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex-1">
-              <label
-                className="mb-1 block text-xs font-medium text-muted-fg"
-                htmlFor="shortlist-notes"
-              >
-                Mis notas
-              </label>
-              <Textarea
-                id="shortlist-notes"
-                value={entry.notes}
-                onChange={(e) => setNotes(o.id, e.target.value)}
-                placeholder="Contactos, dudas del pliego, documentos que faltan…"
-              />
-            </div>
-          </CardContent>
-        </Card>
+        <div className="mt-5 grid gap-3 rounded-lg border border-primary/40 bg-primary-soft/40 p-4 md:grid-cols-[14rem_1fr]">
+          <div>
+            <label className="mb-1 block text-2xs text-muted-fg" htmlFor="shortlist-status">
+              Estado de mi postulación
+            </label>
+            <Select
+              value={entry.status}
+              onValueChange={(v) => setStatus(o.id, v as ShortlistStatus)}
+            >
+              <SelectTrigger id="shortlist-status">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {(Object.keys(SHORTLIST_STATUS_LABELS) as ShortlistStatus[]).map((s) => (
+                  <SelectItem key={s} value={s}>
+                    {SHORTLIST_STATUS_LABELS[s]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <label className="mb-1 block text-2xs text-muted-fg" htmlFor="shortlist-notes">
+              Mis notas
+            </label>
+            <Textarea
+              id="shortlist-notes"
+              value={entry.notes}
+              onChange={(e) => setNotes(o.id, e.target.value)}
+              placeholder="Contactos, dudas del pliego, documentos que faltan"
+            />
+          </div>
+        </div>
       ) : null}
 
-      <div className="mt-5 grid gap-4 lg:grid-cols-[minmax(0,1fr)_22rem]">
-        <div className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Objeto del proceso</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm leading-relaxed whitespace-pre-line">{o.description}</p>
-            </CardContent>
-          </Card>
+      <div className="mt-2 grid gap-8 lg:grid-cols-[minmax(0,1fr)_21rem]">
+        <div>
+          <Section title="Objeto del proceso">
+            <p className="max-w-[70ch] text-[13.5px] leading-relaxed whitespace-pre-line text-fg-2">
+              {o.description}
+            </p>
+          </Section>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Datos clave</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <dl className="grid grid-cols-1 gap-x-6 gap-y-3 sm:grid-cols-2 lg:grid-cols-3">
-                <Field label="Valor estimado">{formatCOP(o.value)}</Field>
-                <Field label="Duración">
-                  {o.duration ? `${o.duration.amount} ${DURATION_LABEL[o.duration.unit]}` : '—'}
+          <Section title="Datos clave">
+            <dl className="grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-3">
+              <Field label="Valor estimado" mono>
+                {formatCOP(o.value)}
+              </Field>
+              <Field label="Duración">
+                {o.duration ? `${o.duration.amount} ${DURATION_LABEL[o.duration.unit]}` : '—'}
+              </Field>
+              <Field label="Lotes" mono>
+                {o.lots ?? '—'}
+              </Field>
+              <Field label="Modalidad (SECOP)">{o.modalityRaw ?? '—'}</Field>
+              <Field label="Justificación de la modalidad" className="sm:col-span-2">
+                {o.modalityJustification ?? '—'}
+              </Field>
+              <Field label="Tipo de contrato">
+                {o.contractType ?? '—'}
+                {o.contractSubtype ? ` · ${o.contractSubtype}` : ''}
+              </Field>
+              <Field label="Categoría UNSPSC" mono>
+                {o.unspscCode ?? '—'}
+                {o.unspscFamily ? (
+                  <span className="ml-1.5 font-sans text-[13px] text-muted-fg">
+                    {UNSPSC_FAMILY_LABELS[o.unspscFamily] ??
+                      UNSPSC_SEGMENT_LABELS[o.unspscSegment ?? ''] ??
+                      ''}
+                  </span>
+                ) : null}
+              </Field>
+              <Field label="Categorías adicionales">{o.additionalCategories ?? '—'}</Field>
+              <Field label="Fase">{o.phase ?? '—'}</Field>
+              <Field label="Portafolio (proceso de compra)" mono>
+                {o.portfolioId ?? '—'}
+              </Field>
+            </dl>
+            {!o.url ? (
+              <p className="mt-4 text-xs text-muted-fg">
+                Sin enlace en el dataset: busca la referencia en{' '}
+                <a
+                  className="text-primary hover:underline"
+                  href="https://community.secop.gov.co/Public/Tendering/ContractNoticeManagement/Index?currentLanguage=es-CO&Page=1&Country=CO"
+                  target="_blank"
+                  rel="noreferrer noopener"
+                >
+                  la búsqueda pública de SECOP II
+                </a>
+                .
+              </p>
+            ) : null}
+          </Section>
+
+          <div className="grid border-t border-border md:grid-cols-2 md:gap-8">
+            <Section title="Cronograma">
+              <dl className="grid grid-cols-2 gap-x-6 gap-y-4">
+                <Field label="Publicado" mono>
+                  {formatDate(o.publishedAt)}
                 </Field>
-                <Field label="Lotes">{o.lots ?? '—'}</Field>
-                <Field label="Modalidad (SECOP)">{o.modalityRaw ?? '—'}</Field>
-                <Field label="Justificación de la modalidad">
-                  {o.modalityJustification ?? '—'}
+                <Field label="Última publicación" mono>
+                  {formatDate(o.lastPublishedAt)}
                 </Field>
-                <Field label="Tipo de contrato">
-                  {o.contractType ?? '—'}
-                  {o.contractSubtype ? ` · ${o.contractSubtype}` : ''}
-                </Field>
-                <Field label="Categoría UNSPSC" mono>
-                  {o.unspscCode ?? '—'}
-                  {o.unspscFamily ? (
+                <Field label="Cierre de respuestas" mono>
+                  {formatDate(o.closesAt)}
+                  {item.lifecycle === 'open' ? (
                     <span className="ml-1 font-sans text-muted-fg">
-                      {UNSPSC_FAMILY_LABELS[o.unspscFamily] ??
-                        UNSPSC_SEGMENT_LABELS[o.unspscSegment ?? ''] ??
-                        ''}
+                      ({daysLeftLabel(item.daysLeft)})
                     </span>
                   ) : null}
                 </Field>
-                <Field label="Categorías adicionales">{o.additionalCategories ?? '—'}</Field>
-                <Field label="Fase">{o.phase ?? '—'}</Field>
-                <Field label="ID del proceso" mono>
-                  {o.id}
+                <Field label="Apertura de respuestas" mono>
+                  {formatDate(o.responseOpensAt)}
                 </Field>
-                <Field label="Referencia" mono>
-                  {o.reference ?? '—'}
+                <Field label="Estado (SECOP)">{o.statusRaw ?? '—'}</Field>
+              </dl>
+            </Section>
+            <Section title="Entidad">
+              <dl className="grid grid-cols-2 gap-x-6 gap-y-4">
+                <Field label="Nombre" className="col-span-2">
+                  {o.entity.name}
                 </Field>
-                <Field label="Portafolio (proceso de compra)" mono>
-                  {o.portfolioId ?? '—'}
+                <Field label="NIT" mono>
+                  {o.entity.nit ?? '—'}
+                </Field>
+                <Field label="Orden">
+                  {o.entity.order === 'desconocido' ? '—' : o.entity.order}
+                </Field>
+                <Field label="Centralizada">
+                  {o.entity.centralized == null ? '—' : o.entity.centralized ? 'Sí' : 'No'}
+                </Field>
+                <Field label="Ubicación">
+                  {o.entity.city ?? '—'}
+                  {o.entity.department ? `, ${o.entity.department}` : ''}
                 </Field>
               </dl>
-              {!o.url ? (
-                <p className="mt-4 flex items-center gap-2 text-xs text-muted-fg">
-                  <Copy className="size-3.5" /> Sin enlace en el dataset: busca la referencia en{' '}
-                  <a
-                    className="text-primary hover:underline"
-                    href="https://community.secop.gov.co/Public/Tendering/ContractNoticeManagement/Index?currentLanguage=es-CO&Page=1&Country=CO"
-                    target="_blank"
-                    rel="noreferrer noopener"
-                  >
-                    la búsqueda pública de SECOP II
-                  </a>
-                  .
-                </p>
-              ) : null}
-            </CardContent>
-          </Card>
-
-          <div className="grid gap-4 md:grid-cols-2">
-            <Card>
-              <CardHeader>
-                <CardTitle>Cronograma</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <dl className="grid grid-cols-2 gap-3">
-                  <Field label="Publicado">{formatDate(o.publishedAt)}</Field>
-                  <Field label="Última publicación">{formatDate(o.lastPublishedAt)}</Field>
-                  <Field label="Cierre de respuestas">
-                    {formatDate(o.closesAt)}
-                    {item.lifecycle === 'open' ? (
-                      <span className="ml-1 text-muted-fg">({daysLeftLabel(item.daysLeft)})</span>
-                    ) : null}
-                  </Field>
-                  <Field label="Apertura de respuestas">{formatDate(o.responseOpensAt)}</Field>
-                  <Field label="Estado (SECOP)">{o.statusRaw ?? '—'}</Field>
-                </dl>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle>Entidad</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <dl className="grid grid-cols-2 gap-3">
-                  <Field label="Nombre">{o.entity.name}</Field>
-                  <Field label="NIT" mono>
-                    {o.entity.nit ?? '—'}
-                  </Field>
-                  <Field label="Orden">
-                    {o.entity.order === 'desconocido' ? '—' : o.entity.order}
-                  </Field>
-                  <Field label="Centralizada">
-                    {o.entity.centralized == null ? '—' : o.entity.centralized ? 'Sí' : 'No'}
-                  </Field>
-                  <Field label="Departamento">{o.entity.department ?? '—'}</Field>
-                  <Field label="Ciudad">{o.entity.city ?? '—'}</Field>
-                </dl>
-              </CardContent>
-            </Card>
+            </Section>
           </div>
 
           {o.award ? (
-            <Card>
-              <CardHeader>
-                <CardTitle>Adjudicación</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                  <Field label="Proveedor">{o.award.supplierName ?? '—'}</Field>
-                  <Field label="NIT" mono>
-                    {o.award.supplierNit ?? '—'}
-                  </Field>
-                  <Field label="Valor">{formatCOP(o.award.value)}</Field>
-                  <Field label="Fecha">{formatDate(o.award.date)}</Field>
-                </dl>
-              </CardContent>
-            </Card>
+            <Section title="Adjudicación">
+              <dl className="grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-4">
+                <Field label="Proveedor">{o.award.supplierName ?? '—'}</Field>
+                <Field label="NIT" mono>
+                  {o.award.supplierNit ?? '—'}
+                </Field>
+                <Field label="Valor" mono>
+                  {formatCOP(o.award.value)}
+                </Field>
+                <Field label="Fecha" mono>
+                  {formatDate(o.award.date)}
+                </Field>
+              </dl>
+            </Section>
           ) : null}
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Participación</CardTitle>
-              <CardDescription>
-                Contadores publicados por SECOP II (suelen actualizarse con retraso).
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <dl className="grid grid-cols-3 gap-3 sm:grid-cols-6">
-                <Field label="Invitados">{formatInt(o.counters.invited)}</Field>
-                <Field label="Invitación directa">{formatInt(o.counters.directInvites)}</Field>
-                <Field label="Vistas">{formatInt(o.counters.views)}</Field>
-                <Field label="Interesados">{formatInt(o.counters.interested)}</Field>
-                <Field label="Respuestas">{formatInt(o.counters.responses)}</Field>
-                <Field label="Oferentes únicos">{formatInt(o.counters.uniqueBidders)}</Field>
-              </dl>
-            </CardContent>
-          </Card>
+          <Section
+            title="Participación"
+            description="Contadores publicados por SECOP II (suelen actualizarse con retraso)."
+          >
+            <dl className="grid grid-cols-3 gap-x-6 gap-y-4 sm:grid-cols-6">
+              <Field label="Invitados" mono>
+                {formatInt(o.counters.invited)}
+              </Field>
+              <Field label="Invitación directa" mono>
+                {formatInt(o.counters.directInvites)}
+              </Field>
+              <Field label="Vistas" mono>
+                {formatInt(o.counters.views)}
+              </Field>
+              <Field label="Interesados" mono>
+                {formatInt(o.counters.interested)}
+              </Field>
+              <Field label="Respuestas" mono>
+                {formatInt(o.counters.responses)}
+              </Field>
+              <Field label="Oferentes únicos" mono>
+                {formatInt(o.counters.uniqueBidders)}
+              </Field>
+            </dl>
+          </Section>
 
-          <EntityHistory opportunity={o} />
+          <div className="border-t border-border pt-5">
+            <EntityHistory opportunity={o} />
+          </div>
         </div>
 
-        <aside className="space-y-4">
+        <aside className="space-y-4 pt-5 lg:pt-0">
           <VerificationChecklist item={item} />
           <Card>
             <CardHeader>
@@ -363,11 +389,11 @@ export function OpportunityDetailPage() {
             <CardHeader>
               <CardTitle>RUP · {RUP_LABELS[item.rup.requirement]}</CardTitle>
               <CardDescription>
-                {item.rup.basis === 'rule' ? 'Regla legal' : 'Inferencia heurística'} — no es una
+                {item.rup.basis === 'rule' ? 'Regla legal' : 'Inferencia heurística'}. No es una
                 garantía.
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-2 text-sm">
+            <CardContent className="space-y-2 text-[13px] leading-relaxed">
               <p>{item.rup.reason}</p>
               {item.rup.notes.map((n) => (
                 <p key={n} className="text-warning">

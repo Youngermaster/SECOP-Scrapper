@@ -1,10 +1,10 @@
 import {
+  LIFECYCLE_LABELS,
   RUP_LABELS,
   SCORE_FLAG_LABELS,
+  type Lifecycle,
   type RupAssessment,
   type ScoreFlag,
-  type Lifecycle,
-  LIFECYCLE_LABELS,
 } from '@secop-radar/core';
 import { Badge, Tooltip, TooltipContent, TooltipTrigger } from '@secop-radar/ui';
 import {
@@ -32,7 +32,7 @@ export function RupBadge({ rup, compact = false }: { rup: RupAssessment; compact
     <Tooltip>
       <TooltipTrigger asChild>
         <Badge tone={RUP_TONE[rup.requirement]} className="cursor-help">
-          <Icon />
+          <Icon strokeWidth={2} />
           {compact ? label.replace('Probablemente ', 'Prob. ') : label}
           {rup.basis === 'inference' ? <span aria-hidden="true">*</span> : null}
         </Badge>
@@ -73,7 +73,7 @@ export function FlagBadges({ flags, max = 3 }: { flags: ScoreFlag[]; max?: numbe
         if (!meta) return null;
         return (
           <Badge key={f} tone={meta.tone}>
-            <meta.icon />
+            <meta.icon strokeWidth={2} />
             {SCORE_FLAG_LABELS[f]}
           </Badge>
         );

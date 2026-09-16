@@ -1,81 +1,132 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 @import 'leaflet/dist/leaflet.css';
+/* Self-hosted variable fonts (offline-safe, ~56 KB for latin). */
+@import '@fontsource-variable/geist';
+@import '@fontsource-variable/geist-mono';
 
 /* Scan the shared UI package for class names. */
 @source '../../../packages/ui/src';
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* ---------- Semantic design tokens ---------- */
+/* ------------------------------------------------------------------------
+   SECOP Radar design tokens ("Instrumento"). See DESIGN.md.
+   One neutral family (cool gray, hue 255), one accent (cobalt), four status
+   colors reserved for meaning. Hairlines instead of shadows. Mono numerals.
+   ------------------------------------------------------------------------ */
 :root {
-  --bg: oklch(98.5% 0.003 250);
-  --fg: oklch(20% 0.02 260);
-  --card: oklch(100% 0 0);
-  --card-fg: var(--fg);
-  --muted: oklch(95.5% 0.006 250);
-  --muted-fg: oklch(50% 0.02 260);
-  --border: oklch(90% 0.008 250);
-  --input: oklch(88% 0.01 250);
-  --primary: oklch(52% 0.2 275);
-  --primary-fg: oklch(99% 0 0);
-  --ring: oklch(62% 0.18 275);
-  --success: oklch(60% 0.16 160);
-  --warning: oklch(70% 0.16 70);
-  --danger: oklch(58% 0.2 25);
-  --info: oklch(60% 0.14 240);
-  --sidebar: oklch(22% 0.025 265);
-  --sidebar-fg: oklch(92% 0.01 260);
-  --sidebar-muted: oklch(70% 0.02 260);
-  --sidebar-active: oklch(30% 0.05 270);
+  /* surfaces */
+  --bg: oklch(97.6% 0.004 255);
+  --card: oklch(99.4% 0.002 255);
+  --muted: oklch(94.8% 0.006 255);
+  --sidebar: oklch(96% 0.005 255);
+  --sidebar-active: oklch(91.5% 0.01 255);
+  /* ink */
+  --fg: oklch(19% 0.018 260);
+  --fg-2: oklch(38% 0.016 258);
+  --muted-fg: oklch(50% 0.014 258);
+  --sidebar-fg: var(--fg);
+  --sidebar-muted: oklch(46% 0.014 258);
+  /* lines */
+  --border: oklch(89.5% 0.008 255);
+  --border-strong: oklch(80% 0.012 255);
+  --input: oklch(85% 0.01 255);
+  /* accent */
+  --primary: oklch(52% 0.17 258);
+  --primary-hover: oklch(46% 0.17 258);
+  --primary-fg: oklch(99.5% 0 0);
+  --primary-soft: oklch(94% 0.03 258);
+  --ring: oklch(60% 0.16 258);
+  /* status (semantic only) */
+  --success: oklch(52% 0.14 155);
+  --success-soft: oklch(94.5% 0.04 155);
+  --warning: oklch(58% 0.14 70);
+  --warning-soft: oklch(95% 0.05 80);
+  --danger: oklch(53% 0.19 27);
+  --danger-soft: oklch(95% 0.03 25);
+  --info: var(--primary);
+  --info-soft: var(--primary-soft);
+  /* shape & elevation */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  --shadow-pop: 0 8px 24px -8px oklch(20% 0.02 260 / 0.18), 0 1px 2px oklch(20% 0.02 260 / 0.06);
 }
 
 .dark {
-  --bg: oklch(15% 0.015 260);
-  --fg: oklch(93% 0.01 250);
-  --card: oklch(19% 0.018 260);
-  --card-fg: var(--fg);
-  --muted: oklch(25% 0.02 260);
-  --muted-fg: oklch(68% 0.02 255);
-  --border: oklch(29% 0.02 260);
-  --input: oklch(32% 0.02 260);
-  --primary: oklch(70% 0.16 275);
-  --primary-fg: oklch(15% 0.02 265);
-  --ring: oklch(72% 0.16 275);
-  --success: oklch(72% 0.16 160);
-  --warning: oklch(78% 0.15 75);
-  --danger: oklch(68% 0.18 25);
-  --info: oklch(72% 0.13 240);
-  --sidebar: oklch(12% 0.015 260);
-  --sidebar-fg: oklch(92% 0.01 260);
-  --sidebar-muted: oklch(62% 0.02 260);
-  --sidebar-active: oklch(24% 0.04 270);
+  --bg: oklch(15.5% 0.01 258);
+  --card: oklch(18.5% 0.011 258);
+  --muted: oklch(23.5% 0.012 258);
+  --sidebar: oklch(13.5% 0.01 258);
+  --sidebar-active: oklch(23% 0.016 258);
+  --fg: oklch(94% 0.006 255);
+  --fg-2: oklch(80% 0.01 255);
+  --muted-fg: oklch(66% 0.012 255);
+  --sidebar-fg: var(--fg);
+  --sidebar-muted: oklch(64% 0.012 255);
+  --border: oklch(27% 0.012 258);
+  --border-strong: oklch(36% 0.014 258);
+  --input: oklch(31% 0.014 258);
+  --primary: oklch(72% 0.13 258);
+  --primary-hover: oklch(78% 0.12 258);
+  --primary-fg: oklch(14% 0.02 258);
+  --primary-soft: oklch(28% 0.06 258);
+  --ring: oklch(72% 0.13 258);
+  --success: oklch(74% 0.14 155);
+  --success-soft: oklch(26% 0.05 155);
+  --warning: oklch(80% 0.14 78);
+  --warning-soft: oklch(28% 0.06 78);
+  --danger: oklch(70% 0.17 25);
+  --danger-soft: oklch(27% 0.06 25);
+  --info: var(--primary);
+  --info-soft: var(--primary-soft);
+  --shadow-pop: 0 12px 32px -10px oklch(0% 0 0 / 0.6), 0 1px 2px oklch(0% 0 0 / 0.3);
 }
 
 @theme inline {
   --font-sans:
-    'Inter', 'SF Pro Text', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    'Geist Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'Geist Mono Variable', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
   --color-bg: var(--bg);
   --color-fg: var(--fg);
+  --color-fg-2: var(--fg-2);
   --color-card: var(--card);
-  --color-card-fg: var(--card-fg);
+  --color-card-fg: var(--fg);
   --color-muted: var(--muted);
   --color-muted-fg: var(--muted-fg);
   --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
   --color-input: var(--input);
   --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
   --color-primary-fg: var(--primary-fg);
+  --color-primary-soft: var(--primary-soft);
   --color-ring: var(--ring);
   --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
   --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
   --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
   --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
   --color-sidebar: var(--sidebar);
   --color-sidebar-fg: var(--sidebar-fg);
   --color-sidebar-muted: var(--sidebar-muted);
   --color-sidebar-active: var(--sidebar-active);
+
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-lg);
+  --radius-2xl: var(--radius-lg);
+
+  --shadow-pop: var(--shadow-pop);
+
+  --text-2xs: 0.6875rem;
+  --text-2xs--line-height: 1rem;
 }
 
 @layer base {
@@ -89,11 +140,24 @@
     color-scheme: dark;
   }
   body {
-    @apply bg-bg font-sans text-fg antialiased;
-    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+    @apply bg-bg font-sans text-[13.5px] leading-normal text-fg antialiased;
+    font-feature-settings: 'ss01', 'cv11';
+  }
+  h1,
+  h2,
+  h3 {
+    @apply tracking-tight;
   }
   ::selection {
-    background: color-mix(in oklch, var(--primary) 25%, transparent);
+    background: color-mix(in oklch, var(--primary) 22%, transparent);
+  }
+  a {
+    @apply underline-offset-2;
+  }
+  /* Numbers, ids, dates: always tabular. */
+  .tabular,
+  .font-mono {
+    font-variant-numeric: tabular-nums;
   }
   @media (prefers-reduced-motion: reduce) {
     *,
@@ -110,24 +174,31 @@
 @layer utilities {
   .scrollbar-thin {
     scrollbar-width: thin;
-    scrollbar-color: color-mix(in oklch, var(--muted-fg) 40%, transparent) transparent;
+    scrollbar-color: color-mix(in oklch, var(--muted-fg) 35%, transparent) transparent;
   }
-  .tabular {
-    font-variant-numeric: tabular-nums;
+  /* Pressed feedback for interactive elements. */
+  .pressable {
+    @apply active:translate-y-px;
   }
 }
 
 /* Leaflet tweaks so the map matches the theme. */
 .leaflet-container {
-  @apply rounded-xl bg-muted font-sans;
+  @apply rounded-lg bg-muted font-sans;
 }
 .dark .leaflet-tile {
-  filter: brightness(0.7) contrast(1.1) saturate(0.6);
+  filter: brightness(0.72) contrast(1.05) saturate(0.55);
 }
 .leaflet-popup-content-wrapper,
 .leaflet-popup-tip {
-  @apply bg-card text-fg shadow-lg;
+  @apply rounded-md bg-card text-fg shadow-pop;
 }
 .leaflet-popup-content {
-  @apply m-3 text-sm;
+  @apply m-3 text-[13px];
+}
+.leaflet-tooltip {
+  @apply rounded-sm border-border bg-card text-fg;
+}
+.leaflet-bar a {
+  @apply border-border bg-card text-fg;
 }

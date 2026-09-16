@@ -169,18 +169,18 @@ export function VerificationChecklist({ item }: { item: ScoredOpportunity }) {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <ul className="space-y-3">
+        <ul className="divide-y divide-border">
           {checks.map((c) => {
             const Icon = ICON[c.level];
             return (
-              <li key={c.title} className="flex gap-3">
+              <li key={c.title} className="flex gap-2.5 py-2.5 first:pt-0 last:pb-0">
                 <Icon
-                  className={cn('mt-0.5 size-4 shrink-0', COLOR[c.level])}
+                  className={cn('mt-0.5 size-3.5 shrink-0', COLOR[c.level])}
                   aria-label={c.level}
                 />
                 <div>
-                  <p className="text-sm font-medium">{c.title}</p>
-                  <p className="text-xs text-muted-fg">{c.detail}</p>
+                  <p className="text-[13px] leading-snug font-medium">{c.title}</p>
+                  <p className="mt-0.5 text-xs leading-snug text-muted-fg">{c.detail}</p>
                 </div>
               </li>
             );

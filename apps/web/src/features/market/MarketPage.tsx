@@ -28,7 +28,7 @@ import {
 } from '@secop-radar/ui';
 import { ExternalLink, Search, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import { ChartCard, StatTile } from '@/components/charts/ChartPrimitives';
+import { ChartCard, StatStrip, StatTile } from '@/components/charts/ChartPrimitives';
 import { RankedBarChart } from '@/components/charts/RankedBarChart';
 import { TimeSeriesChart } from '@/components/charts/TimeSeriesChart';
 import { ErrorState } from '@/components/ErrorState';
@@ -151,7 +151,7 @@ export function MarketPage() {
         title="Mercado de contratos de tecnología"
         description={`Contratos electrónicos SECOP II en categorías TI firmados desde ${formatDate(manifest.window.contractsSince)} · ${manifest.counts.contracts.toLocaleString('es-CO')} en el dataset local.`}
       />
-      <div className="space-y-4 p-4 md:p-6">
+      <div className="space-y-4 p-4 md:p-5">
         <div className="flex flex-wrap items-center gap-2">
           <div className="relative min-w-64 flex-1">
             <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-fg" />
@@ -228,7 +228,7 @@ export function MarketPage() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
+            <StatStrip>
               <StatTile label="Contratos" value={filtered.length.toLocaleString('es-CO')} />
               <StatTile label="Valor total" value={formatCOPCompact(stats.value.total)} />
               <StatTile
@@ -239,7 +239,7 @@ export function MarketPage() {
               <StatTile label="Adjudicados a PYME" value={formatPercent(stats.pymeShare)} />
               <StatTile label="Proveedores" value={stats.suppliers.toLocaleString('es-CO')} />
               <StatTile label="Entidades" value={stats.entities.toLocaleString('es-CO')} />
-            </div>
+            </StatStrip>
 
             <div className="grid gap-4 lg:grid-cols-2">
               <Card>

@@ -77,7 +77,7 @@ function KeywordEditor({
         className="min-h-32 font-mono text-xs"
         spellCheck={false}
       />
-      <p className="text-[11px] text-muted-fg">
+      <p className="text-2xs text-muted-fg">
         {linesToList(text).length} frases · una por línea, sin tildes obligatorias · se aplica al
         salir del campo
       </p>
@@ -111,7 +111,7 @@ function MoneyInput({
             if (Number.isFinite(n) && n > 0) onCommit(Math.round(n * 1_000_000));
             else setText(String(value / 1_000_000));
           }}
-          className="w-32"
+          className="w-32 font-mono"
         />
         <span className="text-xs text-muted-fg">millones COP</span>
       </div>
@@ -146,7 +146,7 @@ export function SettingsPage() {
         title="Ajustes"
         description="Tu perfil como contratista: región, pesos del puntaje, palabras clave y rangos de valor. Todo se recalcula al instante."
       />
-      <div className="grid gap-4 p-4 md:p-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
+      <div className="grid gap-4 p-4 md:p-5 lg:grid-cols-[minmax(0,1fr)_21rem]">
         <div className="space-y-4">
           <Card>
             <CardHeader>
@@ -190,7 +190,7 @@ export function SettingsPage() {
                   ))}
                 </datalist>
               </div>
-              <label className="flex items-center justify-between gap-2 text-sm sm:col-span-2">
+              <label className="flex items-center justify-between gap-2 text-[13px] sm:col-span-2">
                 <span>
                   Solo la ciudad cuenta como mi región
                   <span className="block text-xs text-muted-fg">
@@ -237,11 +237,13 @@ export function SettingsPage() {
             <CardContent className="grid gap-5 sm:grid-cols-2">
               {WEIGHT_KEYS.map((k) => (
                 <div key={k} className="space-y-1.5">
-                  <div className="flex items-center justify-between text-sm">
-                    <Label htmlFor={`w-${k}`} className="text-sm text-fg">
+                  <div className="flex items-center justify-between text-[13px]">
+                    <Label htmlFor={`w-${k}`} className="text-[13px] text-fg">
                       {SCORE_COMPONENT_LABELS[k]}
                     </Label>
-                    <span className="tabular text-xs text-muted-fg">{s.weights[k]}</span>
+                    <span className="font-mono text-xs text-muted-fg tabular-nums">
+                      {s.weights[k]}
+                    </span>
                   </div>
                   <Slider
                     id={`w-${k}`}
@@ -307,7 +309,7 @@ export function SettingsPage() {
                     max={30}
                     value={s.closingSoonDays}
                     onChange={(e) => s.setClosingSoonDays(Math.max(0, Number(e.target.value) || 0))}
-                    className="w-24"
+                    className="w-24 font-mono"
                   />
                   <span className="text-xs text-muted-fg">días</span>
                 </div>
@@ -359,7 +361,7 @@ export function SettingsPage() {
               <CardTitle>Apariencia</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="inline-flex rounded-md bg-sidebar p-1">
+              <div className="inline-flex">
                 <ThemeToggle />
               </div>
             </CardContent>
@@ -375,14 +377,14 @@ export function SettingsPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <ul className="space-y-3">
+              <ul className="divide-y divide-border">
                 {preview.map((it) => (
-                  <li key={it.opportunity.id} className="flex gap-3">
+                  <li key={it.opportunity.id} className="flex gap-3 py-2.5 first:pt-0 last:pb-0">
                     <ScoreChip score={it.score.score} />
                     <div className="min-w-0">
                       <Link
                         to={`/oportunidad/${encodeURIComponent(it.opportunity.id)}`}
-                        className="line-clamp-2 text-sm leading-snug hover:underline"
+                        className="line-clamp-2 text-[13px] leading-snug font-medium hover:underline"
                       >
                         {it.opportunity.title}
                       </Link>

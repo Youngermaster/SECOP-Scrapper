@@ -8,6 +8,7 @@ import {
   type FilterState,
   type Lifecycle,
   type Modality,
+  type ProfileMatch,
   type RupFilter,
 } from '@secop-radar/core';
 import { Button, Checkbox, Input, Label, Slider, Switch } from '@secop-radar/ui';
@@ -128,6 +129,22 @@ export function FilterPanel({ facets }: { facets: FilteredResult['facets'] }) {
           onClear={() => set({ cities: [] })}
           placeholder="Todas las ciudades"
         />
+      </Section>
+
+      <Section title="Mi perfil">
+        <SegmentedControl<ProfileMatch>
+          label="Coincidencia con mi perfil"
+          value={filters.profileMatch}
+          onChange={(profileMatch) => set({ profileMatch })}
+          options={[
+            { value: 'any', label: 'Todas' },
+            { value: 'keywords', label: 'Palabras clave' },
+            { value: 'keywords-or-category', label: 'Palabras o categoría' },
+          ]}
+        />
+        <p className="text-[11px] text-muted-fg">
+          Palabras clave y categorías tecnológicas se configuran en Ajustes.
+        </p>
       </Section>
 
       <Section title="Estado">

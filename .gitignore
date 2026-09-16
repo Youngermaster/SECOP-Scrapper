@@ -20,3 +20,6 @@ apps/web/public/data/
 *.log
 .DS_Store
 coverage/
+
+# Claude Code local state (agent worktrees, settings)
+.claude/

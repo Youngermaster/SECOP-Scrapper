@@ -22,6 +22,7 @@ import { t } from '@/i18n/es';
 import { useFilters } from '@/stores/filters';
 import { FilterPanel } from './FilterPanel';
 import { OpportunityTable } from './OpportunityTable';
+import { PresetBar } from './PresetBar';
 import { useFilteredOpportunities } from './useFilteredOpportunities';
 
 const SORT_OPTIONS: Array<{ value: SortKey; label: string }> = [
@@ -111,6 +112,15 @@ export function OpportunitiesPage() {
       label: 'Competitivos',
       onRemove: () => set({ onlyCompetitive: false }),
     });
+  if (filters.profileMatch !== 'any')
+    chips.push({
+      key: 'profile',
+      label:
+        filters.profileMatch === 'keywords'
+          ? 'Con mis palabras clave'
+          : 'Mi perfil (palabras o categoría)',
+      onRemove: () => set({ profileMatch: 'any' }),
+    });
 
   return (
     <div className="flex h-dvh flex-col">
@@ -158,6 +168,7 @@ export function OpportunitiesPage() {
             {active > 0 ? <Badge tone="primary">{active}</Badge> : null}
           </Button>
         </div>
+        <PresetBar />
         <div className="flex flex-wrap items-center gap-1.5 text-sm text-muted-fg">
           <span className="tabular mr-1">
             <strong className="text-fg">{t.common.results(items.length)}</strong> {t.common.of}{' '}

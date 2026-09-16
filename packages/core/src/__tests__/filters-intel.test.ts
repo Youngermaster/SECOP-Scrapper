@@ -227,3 +227,53 @@ describe('intel', () => {
     expect(sim.length).toBeGreaterThan(0);
   });
 });
+
+describe('profile match and presets', () => {
+  it('filters by profile match', async () => {
+    const { applyFilters: apply, DEFAULT_FILTERS: D } = await import('../filters');
+    const list = enrichAll(
+      [
+        opportunity(), // software keywords + 4323 category
+        opportunity({
+          id_del_proceso: 'K',
+          codigo_principal_de_categoria: 'V1.72141000',
+          nombre_del_procedimiento: 'Construcción de placa huella',
+          descripci_n_del_procedimiento: 'Construcción de placa huella vía rural',
+        }),
+        opportunity({
+          id_del_proceso: 'C',
+          codigo_principal_de_categoria: 'V1.43231512',
+          nombre_del_procedimiento: 'Adquisición de licencias',
+          descripci_n_del_procedimiento: 'Adquisición de licencias antivirus',
+        }),
+      ],
+      ctx,
+    );
+    // "C" only has a negative keyword (adquisición de licencias) but a tech UNSPSC family.
+    expect(apply(list, { ...D, profileMatch: 'keywords' }).map((x) => x.opportunity.id)).toEqual([
+      'CO1.REQ.11035678',
+    ]);
+    expect(
+      apply(list, { ...D, profileMatch: 'keywords-or-category' })
+        .map((x) => x.opportunity.id)
+        .sort(),
+    ).toEqual(['C', 'CO1.REQ.11035678']);
+    expect(apply(list, { ...D, profileMatch: 'any' })).toHaveLength(3);
+  });
+  it('presets produce valid filter states and are detected as active', async () => {
+    const { FILTER_PRESETS, activePresetKey } = await import('../presets');
+    const { filterStateSchema: schema, DEFAULT_FILTERS: D } = await import('../filters');
+    const { DEFAULT_VALUE_PROFILE } = await import('../scoring');
+    const pctx = { todayISO: TODAY, value: DEFAULT_VALUE_PROFILE };
+    for (const p of FILTER_PRESETS)
+      expect(schema.safeParse(p.apply(pctx)).success, p.key).toBe(true);
+    const forMe = FILTER_PRESETS.find((p) => p.key === 'for-me')!.apply(pctx);
+    expect(forMe.profileMatch).toBe('keywords-or-category');
+    expect(forMe.valueMax).toBe(DEFAULT_VALUE_PROFILE.acceptableMax);
+    expect(activePresetKey(forMe, pctx)).toBe('for-me');
+    expect(activePresetKey({ ...D, lifecycles: [] }, pctx)).toBe('all');
+    expect(activePresetKey({ ...D, query: 'x' }, pctx)).toBeNull();
+    const week = FILTER_PRESETS.find((p) => p.key === 'closing-week')!.apply(pctx);
+    expect(week.closesTo).toBe('2026-09-23');
+  });
+});

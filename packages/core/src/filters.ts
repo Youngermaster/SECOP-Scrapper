@@ -18,6 +18,9 @@ export const rupFilterSchema = z.enum([
 ]);
 export type RupFilter = z.infer<typeof rupFilterSchema>;
 
+export const profileMatchSchema = z.enum(['any', 'keywords', 'keywords-or-category']);
+export type ProfileMatch = z.infer<typeof profileMatchSchema>;
+
 export const sortKeySchema = z.enum([
   'score',
   'closesAt',
@@ -53,6 +56,8 @@ export const filterStateSchema = z.object({
   contractTypes: z.array(z.string()).default([]),
   onlyWithUrl: z.boolean().default(false),
   onlyCompetitive: z.boolean().default(false),
+  /** Require the opportunity to match the user's profile (keywords and/or tech UNSPSC category). */
+  profileMatch: profileMatchSchema.default('any'),
   sortKey: sortKeySchema.default('score'),
   sortDir: z.enum(['asc', 'desc']).default('desc'),
 });
@@ -128,6 +133,12 @@ export function matchesFilters(
   }
   if (f.onlyWithUrl && o.urlStatus !== 'ok') return false;
   if (f.onlyCompetitive && !COMPETITIVE.has(o.modality)) return false;
+  if (f.profileMatch !== 'any') {
+    const hasKeywords = item.score.matchedKeywords.length > 0;
+    const techCategory = item.score.flags.includes('tech-category');
+    if (f.profileMatch === 'keywords' && !hasKeywords) return false;
+    if (f.profileMatch === 'keywords-or-category' && !hasKeywords && !techCategory) return false;
+  }
   return true;
 }
 
@@ -207,5 +218,6 @@ export function countActiveFilters(f: FilterState): number {
   if (f.contractTypes.length > 0) n++;
   if (f.onlyWithUrl) n++;
   if (f.onlyCompetitive) n++;
+  if (f.profileMatch !== 'any') n++;
   return n;
 }

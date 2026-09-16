@@ -7,6 +7,7 @@ import {
   canonicalPhase,
   canonicalStatus,
   cleanString,
+  cleanSupplierName,
   cleanUrl,
   daysBetween,
   modalityAcceptsOffers,
@@ -45,6 +46,17 @@ describe('text', () => {
     expect(parseYesNo('Sí')).toBe(true);
     expect(parseYesNo('No')).toBe(false);
     expect(parseYesNo('tal vez')).toBeNull();
+  });
+  it('strips contact junk from supplier names', () => {
+    expect(
+      cleanSupplierName('Royal Tech Group SAS (cotizaciones@royaltech.group - 3155482662)'),
+    ).toBe('Royal Tech Group SAS');
+    expect(cleanSupplierName('CREAR IMAGEN IT - licitaciones@crearimagen.agency')).toBe(
+      'CREAR IMAGEN IT',
+    );
+    expect(cleanSupplierName('ACME S.A.S. [NIT 900123456]')).toBe('ACME S.A.S.');
+    expect(cleanSupplierName('Bizagi (Colombia)')).toBe('Bizagi (Colombia)');
+    expect(cleanSupplierName('No Definido')).toBeNull();
   });
   it('builds a search haystack', () => {
     expect(buildSearchText(['Robótica', null, '  ', 'APP Móvil'])).toBe('robotica | app movil');

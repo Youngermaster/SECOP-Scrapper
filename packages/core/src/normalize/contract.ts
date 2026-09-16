@@ -5,7 +5,14 @@ import { canonicalEntityOrder, parseUnspsc } from './enums';
 import { canonicalModality } from './modality';
 import { parseMoney } from './number';
 import type { NormalizeResult } from './result';
-import { buildSearchText, cleanString, cleanText, normalizeText, parseYesNo } from './text';
+import {
+  buildSearchText,
+  cleanString,
+  cleanSupplierName,
+  cleanText,
+  normalizeText,
+  parseYesNo,
+} from './text';
 import { cleanUrl } from './url';
 
 function dateField(raw: string | undefined, field: string, repairs: string[]): string | null {
@@ -68,7 +75,7 @@ export function normalizeContract(raw: RawContratoRow): NormalizeResult<Contract
     startsAt: dateField(raw.fecha_de_inicio_del_contrato, 'fecha_de_inicio_del_contrato', repairs),
     endsAt: dateField(raw.fecha_de_fin_del_contrato, 'fecha_de_fin_del_contrato', repairs),
     supplier: {
-      name: cleanString(raw.proveedor_adjudicado),
+      name: cleanSupplierName(raw.proveedor_adjudicado),
       docType: cleanString(raw.tipodocproveedor),
       doc: cleanString(raw.documento_proveedor),
       isPyme: parseYesNo(raw.es_pyme),

@@ -6,7 +6,14 @@ import { canonicalModality } from './modality';
 import { parseCount, parseInteger, parseMoney, parseNumber } from './number';
 import { canonicalPhase } from './phase';
 import type { NormalizeResult } from './result';
-import { buildSearchText, cleanString, cleanText, normalizeText, parseYesNo } from './text';
+import {
+  buildSearchText,
+  cleanString,
+  cleanSupplierName,
+  cleanText,
+  normalizeText,
+  parseYesNo,
+} from './text';
 import { cleanUrl } from './url';
 
 function dateField(raw: string | undefined, field: string, repairs: string[]): string | null {
@@ -53,7 +60,7 @@ export function normalizeProcess(raw: RawProcesoRow): NormalizeResult<Opportunit
       : null;
 
   const awarded = parseYesNo(raw.adjudicado) ?? false;
-  const awardSupplier = cleanString(raw.nombre_del_proveedor);
+  const awardSupplier = cleanSupplierName(raw.nombre_del_proveedor);
   const awardValue = parseMoney(raw.valor_total_adjudicacion);
   const awardDate = dateField(raw.fecha_adjudicacion, 'fecha_adjudicacion', repairs);
   const award =

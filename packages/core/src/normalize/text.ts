@@ -95,3 +95,16 @@ export function buildSearchText(parts: Array<string | null | undefined>): string
     .map((p) => normalizeText(p))
     .join(' | ');
 }
+
+/**
+ * Supplier names in SECOP often carry contact junk: "ACME SAS (ventas@acme.co - 3155551234)".
+ * Strip parentheticals/suffixes that contain an e-mail or a long digit run.
+ */
+export function cleanSupplierName(value: unknown): string | null {
+  const name = cleanString(value);
+  if (name == null) return null;
+  let out = name.replace(/\s*[([][^)\]]*(?:@|\d{7,})[^)\]]*[)\]]/g, '');
+  out = out.replace(/\s*[-–|,;]\s*(?:[\w.+-]+@[\w.-]+|\+?\d[\d\s-]{6,})\s*$/g, '');
+  out = collapseWhitespace(out);
+  return out === '' ? name : out;
+}

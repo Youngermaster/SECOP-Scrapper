@@ -1,5 +1,6 @@
 import {
   enrichAll,
+  rescoreAll,
   todayISO,
   type DatasetManifest,
   type GeoData,
@@ -50,10 +51,13 @@ export function DatasetProvider({ children }: { children: ReactNode }) {
   const today = todayISO();
 
   const opportunities = oppsQ.data;
-  const scored = useMemo(
-    () => (opportunities ? enrichAll(opportunities, { todayISO: today, region, weights, profile }) : null),
-    [opportunities, today, region, weights, profile],
+  // Expensive analysis (keywords, RUP, lifecycle) only re-runs when the profile changes;
+  // weight sliders take the cheap re-scoring path.
+  const analysed = useMemo(
+    () => (opportunities ? enrichAll(opportunities, { todayISO: today, region, profile }) : null),
+    [opportunities, today, region, profile],
   );
+  const scored = useMemo(() => (analysed ? rescoreAll(analysed, weights) : null), [analysed, weights]);
   const searchIndex = useMemo(() => (opportunities ? buildSearchIndex(opportunities) : null), [opportunities]);
   const byId = useMemo(() => new Map((opportunities ?? []).map((o) => [o.id, o])), [opportunities]);
   const scoredById = useMemo(() => new Map((scored ?? []).map((s) => [s.opportunity.id, s])), [scored]);

@@ -2,7 +2,9 @@ import { isMyRegion, type RegionProfile } from './geo';
 import { daysLeft, deriveLifecycle } from './lifecycle';
 import { assessRup, type RupAssessment } from './rup';
 import {
-  scoreOpportunity,
+  analyzeOpportunity,
+  scoreFromAnalysis,
+  type OpportunityAnalysis,
   type ScoreResult,
   type ScoringProfile,
   type ScoringWeights,
@@ -17,6 +19,8 @@ export interface ScoredOpportunity {
   rup: RupAssessment;
   score: ScoreResult;
   isMyRegion: boolean;
+  /** Weight-independent analysis; keep it to re-score cheaply when weights change. */
+  analysis: OpportunityAnalysis;
 }
 
 export interface EnrichContext {
@@ -29,10 +33,9 @@ export interface EnrichContext {
 export function enrichOpportunity(o: Opportunity, ctx: EnrichContext): ScoredOpportunity {
   const lifecycle = deriveLifecycle(o, ctx.todayISO);
   const rup = assessRup(o);
-  const score = scoreOpportunity(o, {
+  const analysis = analyzeOpportunity(o, {
     todayISO: ctx.todayISO,
     region: ctx.region,
-    weights: ctx.weights,
     profile: ctx.profile,
     lifecycle,
     rup,
@@ -42,11 +45,20 @@ export function enrichOpportunity(o: Opportunity, ctx: EnrichContext): ScoredOpp
     lifecycle,
     daysLeft: daysLeft(o, ctx.todayISO),
     rup,
-    score,
+    score: scoreFromAnalysis(analysis, ctx.weights),
     isMyRegion: isMyRegion(o.entity, ctx.region),
+    analysis,
   };
 }
 
 export function enrichAll(list: readonly Opportunity[], ctx: EnrichContext): ScoredOpportunity[] {
   return list.map((o) => enrichOpportunity(o, ctx));
+}
+
+/** Re-apply weights to already-analysed items (fast path for weight sliders). */
+export function rescoreAll(
+  items: readonly ScoredOpportunity[],
+  weights?: Partial<ScoringWeights>,
+): ScoredOpportunity[] {
+  return items.map((it) => ({ ...it, score: scoreFromAnalysis(it.analysis, weights) }));
 }

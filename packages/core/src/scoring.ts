@@ -252,17 +252,40 @@ function escapeRegex(s: string): string {
   return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-const phraseRegexCache = new Map<string, RegExp>();
+/**
+ * One alternation regex per phrase list, cached by list identity. Longer phrases first so
+ * "desarrollo de software" wins over "software" at the same position. Word-ish boundaries
+ * so "api" does not match "capital" and "tic" does not match "tico".
+ */
+const listRegexCache = new WeakMap<readonly string[], RegExp | null>();
 
-function phraseRegex(phrase: string): RegExp {
-  let re = phraseRegexCache.get(phrase);
-  if (!re) {
-    const normalized = normalizeText(stripAccents(phrase));
-    // Word-ish boundaries so "api" does not match "capital" and "tic" not "tico".
-    re = new RegExp(`(^|[^a-z0-9])${escapeRegex(normalized)}(?=$|[^a-z0-9])`, 'i');
-    phraseRegexCache.set(phrase, re);
-  }
+function listRegex(phrases: readonly string[]): RegExp | null {
+  const cached = listRegexCache.get(phrases);
+  if (cached !== undefined) return cached;
+  const normalized = [
+    ...new Set(phrases.map((p) => normalizeText(stripAccents(p))).filter(Boolean)),
+  ].sort((a, b) => b.length - a.length);
+  const re =
+    normalized.length === 0
+      ? null
+      : new RegExp(`(?:^|[^a-z0-9])(${normalized.map(escapeRegex).join('|')})(?=$|[^a-z0-9])`, 'g');
+  listRegexCache.set(phrases, re);
   return re;
+}
+
+function matchPhrases(text: string, phrases: readonly string[]): string[] {
+  const re = listRegex(phrases);
+  if (!re) return [];
+  const found = new Set<string>();
+  re.lastIndex = 0;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(text)) !== null) {
+    if (m[1] !== undefined) found.add(m[1]);
+    // Allow overlapping matches that start right after the boundary character.
+    if (m[0].length === 0) re.lastIndex += 1;
+    else re.lastIndex = m.index + 1;
+  }
+  return [...found];
 }
 
 export interface KeywordMatch {
@@ -273,22 +296,12 @@ export interface KeywordMatch {
 
 /** Keyword sub-score over the normalized search text. */
 export function scoreKeywords(searchText: string, kw: KeywordProfile): KeywordMatch {
-  const matched: string[] = [];
-  let sum = 0;
-  const tiers: Array<[string[], number]> = [
-    [kw.strong, 1],
-    [kw.medium, 0.5],
-    [kw.weak, 0.25],
-  ];
-  for (const [phrases, weight] of tiers) {
-    for (const p of phrases) {
-      if (phraseRegex(p).test(searchText)) {
-        matched.push(p);
-        sum += weight;
-      }
-    }
-  }
-  const negative = kw.negative.filter((p) => phraseRegex(p).test(searchText));
+  const strong = matchPhrases(searchText, kw.strong);
+  const medium = matchPhrases(searchText, kw.medium);
+  const weak = matchPhrases(searchText, kw.weak);
+  const negative = matchPhrases(searchText, kw.negative);
+  const matched = [...strong, ...medium, ...weak];
+  const sum = strong.length * 1 + medium.length * 0.5 + weak.length * 0.25;
   let raw = clamp01(sum);
   if (negative.length > 0) raw = matched.length === 0 ? 0 : raw * 0.5;
   return { raw, matched, negative };
@@ -381,8 +394,22 @@ function formatCOPShort(n: number): string {
   return `${Math.round(n / 1000)} mil`;
 }
 
-export function scoreOpportunity(o: Opportunity, ctx: ScoringContext): ScoreResult {
-  const weights: ScoringWeights = { ...DEFAULT_WEIGHTS, ...ctx.weights };
+/** Everything about an opportunity that does not depend on the weights. */
+export interface OpportunityAnalysis {
+  lifecycle: Lifecycle;
+  daysLeft: number | null;
+  rup: RupAssessment;
+  inRegion: boolean;
+  keywords: KeywordMatch;
+  raws: Record<ScoreComponentKey, { raw: number; detail: string }>;
+  flags: ScoreFlag[];
+}
+
+/** The expensive half of scoring: keyword matching, RUP, lifecycle, category, value curves. */
+export function analyzeOpportunity(
+  o: Opportunity,
+  ctx: Omit<ScoringContext, 'weights'>,
+): OpportunityAnalysis {
   const profile = ctx.profile ?? DEFAULT_PROFILE;
   const lifecycle = ctx.lifecycle ?? deriveLifecycle(o, ctx.todayISO);
   const rup = ctx.rup ?? assessRup(o);
@@ -438,28 +465,8 @@ export function scoreOpportunity(o: Opportunity, ctx: ScoringContext): ScoreResu
               ? 'Cierra hoy'
               : `Cierra en ${days} día(s)`,
     },
-    region: {
-      raw: region,
-      detail: inRegion ? 'En tu región' : 'Fuera de tu región',
-    },
+    region: { raw: region, detail: inRegion ? 'En tu región' : 'Fuera de tu región' },
   };
-
-  const totalWeight = (Object.keys(raws) as ScoreComponentKey[]).reduce(
-    (acc, k) => acc + Math.max(0, weights[k]),
-    0,
-  );
-  const components: ScoreComponent[] = (Object.keys(raws) as ScoreComponentKey[]).map((key) => {
-    const w = Math.max(0, weights[key]);
-    const r = raws[key];
-    return {
-      key,
-      raw: r.raw,
-      weight: w,
-      contribution: totalWeight > 0 ? (r.raw * w * 100) / totalWeight : 0,
-      detail: r.detail,
-    };
-  });
-  const score = Math.round(components.reduce((acc, c) => acc + c.contribution, 0));
 
   const flags: ScoreFlag[] = [];
   if (o.value != null && o.value >= profile.value.tooBig) flags.push('too-big');
@@ -477,7 +484,41 @@ export function scoreOpportunity(o: Opportunity, ctx: ScoringContext): ScoreResu
   if (category >= 0.9) flags.push('tech-category');
   if (o.urlStatus !== 'ok') flags.push('url-missing');
 
-  return { score, components, flags, matchedKeywords: kw.matched, negativeKeywords: kw.negative };
+  return { lifecycle, daysLeft: days, rup, inRegion, keywords: kw, raws, flags };
+}
+
+const COMPONENT_KEYS = Object.keys(DEFAULT_WEIGHTS) as ScoreComponentKey[];
+
+/** The cheap half: combine the analysis with weights into a 0–100 score. */
+export function scoreFromAnalysis(
+  a: OpportunityAnalysis,
+  partial?: Partial<ScoringWeights>,
+): ScoreResult {
+  const weights: ScoringWeights = { ...DEFAULT_WEIGHTS, ...partial };
+  const totalWeight = COMPONENT_KEYS.reduce((acc, k) => acc + Math.max(0, weights[k]), 0);
+  const components: ScoreComponent[] = COMPONENT_KEYS.map((key) => {
+    const w = Math.max(0, weights[key]);
+    const r = a.raws[key];
+    return {
+      key,
+      raw: r.raw,
+      weight: w,
+      contribution: totalWeight > 0 ? (r.raw * w * 100) / totalWeight : 0,
+      detail: r.detail,
+    };
+  });
+  const score = Math.round(components.reduce((acc, c) => acc + c.contribution, 0));
+  return {
+    score,
+    components,
+    flags: a.flags,
+    matchedKeywords: a.keywords.matched,
+    negativeKeywords: a.keywords.negative,
+  };
+}
+
+export function scoreOpportunity(o: Opportunity, ctx: ScoringContext): ScoreResult {
+  return scoreFromAnalysis(analyzeOpportunity(o, ctx), ctx.weights);
 }
 
 export const SCORE_COMPONENT_LABELS: Record<ScoreComponentKey, string> = {

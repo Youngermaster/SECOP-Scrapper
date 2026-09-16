@@ -57,8 +57,27 @@ export default tseslint.config(
     plugins: { 'react-hooks': reactHooks, 'react-refresh': reactRefresh },
     rules: {
       ...reactHooks.configs.recommended.rules,
-      'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
+      // We do not use the React Compiler; TanStack Virtual is flagged as "incompatible" only for it.
+      'react-hooks/incompatible-library': 'off',
+      'react-refresh/only-export-components': [
+        'warn',
+        {
+          allowConstantExport: true,
+          allowExportNames: [
+            'useDataset',
+            'scoreTone',
+            'buttonVariants',
+            'badgeVariants',
+            'inputClass',
+          ],
+        },
+      ],
     },
+  },
+  // The UI package is a library, not an HMR boundary.
+  {
+    files: ['packages/ui/**/*.{ts,tsx}'],
+    rules: { 'react-refresh/only-export-components': 'off' },
   },
   // Tests.
   {

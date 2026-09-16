@@ -4,6 +4,7 @@ import { LIFECYCLES } from './lifecycle';
 import { MODALITIES } from './constants/modalities';
 import { normalizeKey } from './normalize/text';
 import type { RupRequirement } from './rup';
+import type { Lifecycle, Modality } from './types';
 
 export const regionModeSchema = z.enum(['all', 'only-mine', 'exclude-mine']);
 export type RegionMode = z.infer<typeof regionModeSchema>;
@@ -37,8 +38,10 @@ export const filterStateSchema = z.object({
   valueMin: z.number().nullable().default(null),
   valueMax: z.number().nullable().default(null),
   includeUnknownValue: z.boolean().default(true),
-  modalities: z.array(z.enum(MODALITIES as [string, ...string[]])).default([]),
-  lifecycles: z.array(z.enum(LIFECYCLES as [string, ...string[]])).default(['open']),
+  modalities: z.array(z.enum(MODALITIES as unknown as [Modality, ...Modality[]])).default([]),
+  lifecycles: z
+    .array(z.enum(LIFECYCLES as unknown as [Lifecycle, ...Lifecycle[]]))
+    .default(['open']),
   rup: rupFilterSchema.default('any'),
   publishedFrom: z.string().nullable().default(null),
   publishedTo: z.string().nullable().default(null),

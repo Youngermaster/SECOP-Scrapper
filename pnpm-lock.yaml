@@ -182,6 +182,9 @@ importers:
 
   packages/secop-client:
     dependencies:
+      '@secop-radar/core':
+        specifier: workspace:*
+        version: link:../core
       zod:
         specifier: ^4.6.5
         version: 4.6.5

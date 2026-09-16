@@ -1,0 +1,37 @@
+{
+  "name": "secop-radar",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "SECOP Radar \u2014 local-first Colombian public-procurement opportunity finder (Turborepo + pnpm, Vite SPA, SQLite scraper)",
+  "license": "MIT",
+  "packageManager": "pnpm@10.33.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "turbo run dev --filter=@secop-radar/web",
+    "build": "turbo run build",
+    "preview": "turbo run preview --filter=@secop-radar/web",
+    "scraper": "pnpm --filter @secop-radar/scraper scrape",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "verify": "turbo run typecheck lint test build && pnpm format:check"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.10.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.7",
+    "globals": "^17.12.0",
+    "prettier": "^3.9.7",
+    "prettier-plugin-tailwindcss": "^0.8.1",
+    "turbo": "^2.10.13",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.70.0"
+  }
+}

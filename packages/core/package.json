@@ -1,0 +1,23 @@
+{
+  "name": "@secop-radar/core",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Pure domain logic for SECOP Radar: types, normalization, RUP inference, scoring, filters, geo, market intel.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.5",
+    "typescript": "~5.9.3",
+    "vitest": "^4.1.11"
+  }
+}

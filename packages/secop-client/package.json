@@ -1,0 +1,23 @@
+{
+  "name": "@secop-radar/secop-client",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Typed Socrata/SODA client for the SECOP datasets on datos.gov.co: SoQL builder, fetch with retry, paging.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.5",
+    "typescript": "~5.9.3",
+    "vitest": "^4.1.11"
+  }
+}

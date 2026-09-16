@@ -1,0 +1,10 @@
+node_modules
+dist
+.turbo
+pnpm-lock.yaml
+data
+apps/web/public/data
+apps/web/public/geo
+*.geojson
+*.db
+CHANGELOG.md

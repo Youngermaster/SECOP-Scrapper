@@ -1,0 +1,32 @@
+{
+  "name": "@secop-radar/scraper",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "CLI that pulls SECOP II data via @secop-radar/secop-client, cleans it, stores it in SQLite and exports static JSON for the web app.",
+  "bin": {
+    "secop-radar-scraper": "./src/cli.ts"
+  },
+  "scripts": {
+    "scrape": "tsx src/cli.ts",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@secop-radar/core": "workspace:*",
+    "@secop-radar/secop-client": "workspace:*",
+    "better-sqlite3": "^13.0.3",
+    "commander": "^15.0.0",
+    "consola": "^3.4.2",
+    "dotenv": "^17.4.2",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^9.6.0",
+    "@types/node": "^24.13.5",
+    "tsx": "^4.23.13",
+    "typescript": "~5.9.3",
+    "vitest": "^4.1.11"
+  }
+}

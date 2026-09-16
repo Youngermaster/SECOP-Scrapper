@@ -1,0 +1,9 @@
+packages:
+  - apps/*
+  - packages/*
+
+# better-sqlite3 >= 13 ships prebuilt binaries inside the package, so no native build is needed.
+onlyBuiltDependencies:
+  - esbuild
+ignoredBuiltDependencies:
+  - better-sqlite3

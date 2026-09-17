@@ -283,8 +283,4 @@ processes are published in SECOP II.
 - **Group-by queries on the contracts dataset time out** — always filter by `fecha_de_firma` and a category prefix (the scraper does).
 - **A process has no link** — the dataset published the login page; use the reference shown in the detail view in SECOP II's public search.
 - **Windows** — `better-sqlite3` ships prebuilt binaries for win32 x64/arm64; the `.gz` artifacts are read with the browser's `DecompressionStream` (Chrome 80+, Firefox 113+, Safari 16.4+).
-
 ## License
-
-MIT — see `LICENSE`. Data © Colombia Compra Eficiente / datos.gov.co under their open-data terms;
-map polygons derived from DANE MGN 2018; tiles © OpenStreetMap contributors.
